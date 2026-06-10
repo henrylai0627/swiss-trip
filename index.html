@@ -100,6 +100,9 @@ footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
 <footer>BB &amp; Henry · Switzerland + Milano 2026 ❤️</footer>
 
 <script>
+const gm = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const pin = q => q ? ` <a class="mlink" href="${gm(q)}" target="_blank" rel="noopener" title="喺 Google Maps 開">📍</a>` : "";
+
 const DAYS = [
 {
   id:"d0625", date:"2026-06-25", chip:{w:"四",d:"25/6"}, title:"6月25日 (四) 出發日", route:"香港 → 機場", badge:{t:"✈️ 夜機",c:"flight"}, hotel:{ic:"✈️",nm:"On Plane",loc:"CX383 凌晨起飛"},
@@ -271,22 +274,22 @@ const DAYS = [
 },
 {
   id:"d0701", date:"2026-07-01", chip:{w:"三",d:"1/7"}, title:"7月1日 (三) 米蘭", route:"Domodossola → Milano 🇮🇹",
-  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano (住3晚)"},
+  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano (住3晚)",m:"Hotel Bristol Milano"},
   tl:[
     {t:"08:56-10:30",x:"火車 Domodossola → Milano ($216.25/2人)",hl:1},
     {t:"10:45",x:"擺行李去 Hotel",s:"*14:00 先可以 Check in"},
-    {t:"11:00",x:"Lunch: Spontini Pizza 🍕"},
-    {t:"12:00-12:30",x:"米蘭大教堂 The Duomo di Milano ⛪️",s:"€8 = $146.91/2人",hl:1},
-    {t:"下午",x:"Galleria Vittorio Emanuele II 拱廊街"},
-    {t:"",x:"Castello Sforzesco 斯福爾扎古堡"},
-    {t:"",x:"Parco Sempione 森皮奧內公園 + 和平之門"},
-    {t:"",x:"+/- Via Monte Napoleone 蒙特拿破崙大街"},
-    {t:"19:30",x:"Dinner @ Navigli 運河區 + 睇日落 🌇",s:"日落 21:15",hl:1},
+    {t:"11:00",x:"Lunch: Spontini Pizza 🍕",m:"Spontini Milano Duomo"},
+    {t:"12:00-12:30",x:"米蘭大教堂 The Duomo di Milano ⛪️",s:"€8 = $146.91/2人",hl:1,m:"Duomo di Milano"},
+    {t:"下午",x:"Galleria Vittorio Emanuele II 拱廊街",m:"Galleria Vittorio Emanuele II Milano"},
+    {t:"",x:"Castello Sforzesco 斯福爾扎古堡",m:"Castello Sforzesco Milano"},
+    {t:"",x:"Parco Sempione 森皮奧內公園 + 和平之門",m:"Parco Sempione Milano"},
+    {t:"",x:"+/- Via Monte Napoleone 蒙特拿破崙大街",m:"Via Monte Napoleone Milano"},
+    {t:"19:30",x:"Dinner @ Navigli 運河區 + 睇日落 🌇",s:"日落 21:15",hl:1,m:"Navigli Milano"},
   ],
   meals:[
-    {k:"☀️",b:"Lunch",v:"Spontini Pizza"},
-    {k:"🥪",b:"小食",v:"Panzerotti Luini 炸三文治 · Ciacco (Gelato) · La hora feliz"},
-    {k:"🌙",b:"Dinner",v:"OSTERIA DA FORTUNATA MILANO NAVIGLI (意粉)"},
+    {k:"☀️",b:"Lunch",v:"Spontini Pizza",m:"Spontini Milano Duomo"},
+    {k:"🥪",b:"小食",v:`Panzerotti Luini 炸三文治${pin("Luini Panzerotti Milano")} · Ciacco (Gelato)${pin("Ciacco Gelato Milano")} · La hora feliz${pin("La Hora Feliz Milano")}`},
+    {k:"🌙",b:"Dinner",v:"OSTERIA DA FORTUNATA MILANO NAVIGLI (意粉)",m:"Osteria da Fortunata Navigli Milano"},
   ],
   costs:["火車 $216.25/2人","Duomo €8 = $146.91/2人"],
   tips:[],
@@ -294,18 +297,18 @@ const DAYS = [
 },
 {
   id:"d0702", date:"2026-07-02", chip:{w:"四",d:"2/7"}, title:"7月2日 (四) 威尼斯一日遊", route:"Milano ⇄ Venezia 🚤",
-  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano"},
+  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano",m:"Hotel Bristol Milano"},
   tl:[
-    {t:"09:35-12:03",x:"火車去 Venezia S.Lucia ($595.21/2人 Round)",hl:1},
-    {t:"下午",x:"聖馬可廣場 Piazza San Marco"},
-    {t:"",x:"聖馬可大教堂"},
-    {t:"",x:"總督宮 Palazzo Ducale"},
-    {t:"",x:"嘆息橋 Ponte dei Sospiri"},
+    {t:"09:35-12:03",x:"火車去 Venezia S.Lucia ($595.21/2人 Round)",hl:1,m:"Venezia Santa Lucia"},
+    {t:"下午",x:"聖馬可廣場 Piazza San Marco",m:"Piazza San Marco Venezia"},
+    {t:"",x:"聖馬可大教堂",m:"Basilica di San Marco Venezia"},
+    {t:"",x:"總督宮 Palazzo Ducale",m:"Palazzo Ducale Venezia"},
+    {t:"",x:"嘆息橋 Ponte dei Sospiri",m:"Ponte dei Sospiri Venezia"},
     {t:"17:57-20:25",x:"@Venezia S.Lucia 火車返 Milano Centrale",hl:1},
   ],
   meals:[
-    {k:"🍝",b:"食咩好",v:"Del Moro's Fresh Pasta to Go · Pasta Go Espresso 義大利麵"},
-    {k:"🍰",b:"甜品",v:"VENEZIA Tre Mercanti 提拉米蘇 · Gelateria Gallonetto 義式冰淇淋"},
+    {k:"🍝",b:"食咩好",v:`Del Moro's Fresh Pasta to Go${pin("Dal Moro's Fresh Pasta To Go Venezia")} · Pasta Go Espresso 義大利麵${pin("Pasta Go Espresso Venezia")}`},
+    {k:"🍰",b:"甜品",v:`VENEZIA Tre Mercanti 提拉米蘇${pin("I Tre Mercanti Venezia")} · Gelateria Gallonetto 義式冰淇淋${pin("Gelateria Gallonetto Venezia")}`},
   ],
   costs:["火車來回 $595.21/2人"],
   tips:["✅ 7月2日<b>唔使買票入城</b>!(Access fee 豁免日)"],
@@ -315,15 +318,15 @@ const DAYS = [
 },
 {
   id:"d0703", date:"2026-07-03", chip:{w:"五",d:"3/7"}, title:"7月3日 (五) 科莫湖", route:"Milano → Varenna ⇄ Bellagio 🛥",
-  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano"},
+  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano",m:"Hotel Bristol Milano"},
   tl:[
-    {t:"朝早",x:"火車 Milano → Varenna",s:"⚠️ 睇咗天氣好先買飛!前一日喺 Trenord 買",hl:1},
-    {t:"",x:"Varenna 乘渡輪前往 Bellagio",s:"直接買 Varenna–Bellagio Round Trip 船飛"},
-    {t:"",x:"Bellagio 遊覽",hl:1},
-    {t:"",x:"Punta Spartivento 分叉點"},
-    {t:"",x:"聖雅各伯聖殿 Basilica di San Giacomo"},
-    {t:"",x:"梅爾齊別墅花園 I Giardini di Villa Melzi",s:"要買 ticket €10 (可以即場買)"},
-    {t:"",x:"返 Varenna +/- 韋齊奧城堡 Castello di Vezio",s:"要 ticket"},
+    {t:"朝早",x:"火車 Milano → Varenna",s:"⚠️ 睇咗天氣好先買飛!前一日喺 Trenord 買",hl:1,m:"Varenna-Esino railway station"},
+    {t:"",x:"Varenna 乘渡輪前往 Bellagio",s:"直接買 Varenna–Bellagio Round Trip 船飛",m:"Imbarcadero Varenna"},
+    {t:"",x:"Bellagio 遊覽",hl:1,m:"Bellagio Lake Como"},
+    {t:"",x:"Punta Spartivento 分叉點",m:"Punta Spartivento Bellagio"},
+    {t:"",x:"聖雅各伯聖殿 Basilica di San Giacomo",m:"Basilica di San Giacomo Bellagio"},
+    {t:"",x:"梅爾齊別墅花園 I Giardini di Villa Melzi",s:"要買 ticket €10 (可以即場買)",m:"Giardini di Villa Melzi Bellagio"},
+    {t:"",x:"返 Varenna +/- 韋齊奧城堡 Castello di Vezio",s:"要 ticket",m:"Castello di Vezio Varenna"},
   ],
   meals:[],
   costs:["Villa Melzi 花園 €10"],
@@ -339,7 +342,7 @@ const DAYS = [
   hotel:{ic:"✈️",nm:"On Plane",loc:"Etihad 經 Abu Dhabi"},
   tl:[
     {t:"07:30",x:"Final Breakfast + Check out"},
-    {t:"08:00",x:"搭車去機場 (Malpensa MXP)"},
+    {t:"08:00",x:"搭車去機場 (Malpensa MXP)",m:"Milano Malpensa Airport Terminal 1"},
     {t:"08:30",x:"Airport check in",hl:1},
     {t:"11:40",x:"MXP 起飛 ✈️ (EY 82, 6hr)",hl:1},
     {t:"19:40",x:"到 AUH (Abu Dhabi)"},
@@ -388,9 +391,6 @@ const $ = s => document.querySelector(s);
 const tabsEl = $("#tabs"), mainEl = $("#main");
 
 function esc(s){return s||""}
-
-const gm = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
-const pin = q => q ? ` <a class="mlink" href="${gm(q)}" target="_blank" rel="noopener" title="喺 Google Maps 開">📍</a>` : "";
 
 function renderDay(d){
   let h = `<section class="section" id="${d.id}">`;
