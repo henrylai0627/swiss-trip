@@ -115,18 +115,18 @@ const DAYS = [
 },
 {
   id:"d0626", date:"2026-06-26", chip:{w:"五",d:"26/6"}, title:"6月26日 (五) 抵達瑞士", route:"HKG → 蘇黎世 ZRH → 因特拉肯 Interlaken → 格林德瓦", badge:{t:"✈️ CX383 00:25 起飛",c:"flight"},
-  hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald (今晚起住3晚)"},
+  hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald (今晚起住3晚)",m:"Hotel Bellevue-Pinte Grindelwald"},
   tl:[
     {t:"00:25",x:"HKG 起飛 (CX383,13hr 5m)",s:"Breakfast 喺機上食"},
     {t:"07:30",x:"到達 ZRH 蘇黎世機場",hl:1},
     {t:"08:45",x:"離開 ZRH 搭火車前往 Interlaken"},
-    {t:"11:00",x:"抵達 Interlaken Ost,寄放行李 + 買 Lunch @Coop",s:"月台旁有成排置物櫃,準備定 CHF 硬幣(部分接受信用卡)"},
-    {t:"11:30",x:"抵達哈德昆纜車站 (Harderbahn)"},
-    {t:"11:40-12:40",x:"哈德昆觀景台 Harder Kulm + Lunch",s:"纜車10分鐘,每30分鐘一班 · 來回 CHF 22",hl:1},
-    {t:"13:00-13:45",x:"阿爾卑斯野生動物園 (Alpine Wildlife Park)"},
-    {t:"14:00-15:45",x:"Höhematte Park (chill) + Höheweg 主街散步 + Casino Interlaken 打卡"},
-    {t:"16:07-16:51",x:"Interlaken Ost 坐船去 Iseltwald",s:"船飛要提前買 · CHF 10.5",hl:1},
-    {t:"17:00-17:45",x:"漫步布里恩茨湖 Lake Brienz"},
+    {t:"11:00",x:"抵達 Interlaken Ost,寄放行李 + 買 Lunch @Coop",s:"月台旁有成排置物櫃,準備定 CHF 硬幣(部分接受信用卡)",m:"Interlaken Ost Bahnhof"},
+    {t:"11:30",x:"抵達哈德昆纜車站 (Harderbahn)",m:"Harderbahn Interlaken"},
+    {t:"11:40-12:40",x:"哈德昆觀景台 Harder Kulm + Lunch",s:"纜車10分鐘,每30分鐘一班 · 來回 CHF 22",hl:1,m:"Harder Kulm"},
+    {t:"13:00-13:45",x:"阿爾卑斯野生動物園 (Alpine Wildlife Park)",m:"Alpine Wildlife Park Interlaken"},
+    {t:"14:00-15:45",x:"Höhematte Park (chill) + Höheweg 主街散步 + Casino Interlaken 打卡",m:"Höhematte Interlaken"},
+    {t:"16:07-16:51",x:"Interlaken Ost 坐船去 Iseltwald",s:"船飛要提前買 · CHF 10.5",hl:1,m:"Iseltwald"},
+    {t:"17:00-17:45",x:"漫步布里恩茨湖 Lake Brienz",m:"Lake Brienz"},
     {t:"17:57-18:11",x:"Bus 103 返 Interlaken Ost (CHF 3.2)"},
     {t:"19:00前",x:"Coop 超市補給",s:"*買明天早餐+午餐"},
     {t:"19:34-20:03",x:"火車前往 Grindelwald (35mins)"},
@@ -152,18 +152,18 @@ const DAYS = [
   hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald"},
   tl:[
     {t:"07:30",x:"Wake up ⏰"},
-    {t:"08:30",x:"鎮中心步行去纜車站 (Firstbahn AG),乘纜車上 Schreckfeld"},
+    {t:"08:30",x:"鎮中心步行去纜車站 (Firstbahn AG),乘纜車上 Schreckfeld",m:"Firstbahn Grindelwald"},
     {t:"10:00",x:"玩 Mountain Cart 🛞 (Schreckfeld → Bort)",s:"之後搭返纜車上 First",hl:1},
-    {t:"11:00",x:"First Cliff Walk 懸崖步道",hl:1},
-    {t:"11:30",x:"健行至 Bachalpsee 高山湖泊 🏔",s:"往返約2小時 · 湖邊自備 Lunch"},
+    {t:"11:00",x:"First Cliff Walk 懸崖步道",hl:1,m:"First Cliff Walk Grindelwald"},
+    {t:"11:30",x:"健行至 Bachalpsee 高山湖泊 🏔",s:"往返約2小時 · 湖邊自備 Lunch",m:"Bachalpsee"},
     {t:"15:30",x:"First Trottibike 🛴 落山",hl:1},
-    {t:"17:00",x:"返回 Grindelwald 鎮上逛 + Playground + Terminal"},
-    {t:"18:30",x:"🎂 Birthday Dinner @ Onkel Tom's Hütte",s:"手工 Pizza 質素極高,溫馨小木屋感",hl:1},
+    {t:"17:00",x:"返回 Grindelwald 鎮上逛 + Playground + Terminal",m:"Grindelwald Terminal"},
+    {t:"18:30",x:"🎂 Birthday Dinner @ Onkel Tom's Hütte",s:"手工 Pizza 質素極高,溫馨小木屋感",hl:1,m:"Onkel Tom's Hütte Grindelwald"},
   ],
   meals:[
     {k:"🌅",b:"Breakfast",v:"Coop"},
     {k:"☀️",b:"Lunch",v:"Coop 買,帶去 Bachalpsee 湖邊食"},
-    {k:"🎂",b:"BB Birthday Dinner",v:"Onkel Tom's Hütte 手工 Pizza"},
+    {k:"🎂",b:"BB Birthday Dinner",v:"Onkel Tom's Hütte 手工 Pizza",m:"Onkel Tom's Hütte Grindelwald"},
     {k:"🛒",b:"記住",v:"買明天早+午+/-晚餐"},
   ],
   costs:["First 冒險活動套票 (Adventure Package) CHF 81/人 — 包 Mountain Cart (Schreckfeld→Bort)、First Trottibike (from Bort)、無限纜車"],
@@ -179,13 +179,13 @@ const DAYS = [
   hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald"},
   tl:[
     {t:"06:45",x:"Wake up ⏰"},
-    {t:"07:15",x:"搭巴士前往 Grindelwald Terminal (CHF 2.2)"},
+    {t:"07:15",x:"搭巴士前往 Grindelwald Terminal (CHF 2.2)",m:"Grindelwald Terminal"},
     {t:"07:45",x:"轉乘 Eiger Express 前往少女峰",s:"要提前 Book! CHF 59.8-60.9",hl:1},
-    {t:"08:40",x:"抵達 Top of Europe 🇨🇭",s:"獅身人面像觀景台 Sphinx Observatory · 冰宮 Alpine Sensation & Ice Palace · 瑞士國旗 Jungfraujoch Plateau",hl:1},
+    {t:"08:40",x:"抵達 Top of Europe 🇨🇭",s:"獅身人面像觀景台 Sphinx Observatory · 冰宮 Alpine Sensation & Ice Palace · 瑞士國旗 Jungfraujoch Plateau",hl:1,m:"Jungfraujoch"},
     {t:"12:00",x:"Lunch (自備)"},
-    {t:"13:00",x:"搭到艾格冰川 Eigergletscher,健行至小夏戴克 Kleine Scheidegg",s:"之後再搭車返 Grindelwald Terminal (CHF 39.5 + CHF 21.8-22.9)"},
+    {t:"13:00",x:"搭到艾格冰川 Eigergletscher,健行至小夏戴克 Kleine Scheidegg",s:"之後再搭車返 Grindelwald Terminal (CHF 39.5 + CHF 21.8-22.9)",m:"Kleine Scheidegg"},
     {t:"14:45",x:"Bus 122 去 Grindelwald 纜車站 (CHF 2.2)"},
-    {t:"15:00",x:"[如果好天 ☀️] Rodelbahn Pfingstegg 纜車上山 (5mins)",s:"纜車來回 CHF 16 · 滑梯 CHF 8/人 · Fly-Line CHF 14/人"},
+    {t:"15:00",x:"[如果好天 ☀️] Rodelbahn Pfingstegg 纜車上山 (5mins)",s:"纜車來回 CHF 16 · 滑梯 CHF 8/人 · Fly-Line CHF 14/人",m:"Pfingsteggbahn Grindelwald"},
     {t:"18:00",x:"搭纜車落山休息"},
   ],
   meals:[
@@ -208,17 +208,17 @@ const DAYS = [
 },
 {
   id:"d0629", date:"2026-06-29", chip:{w:"一",d:"29/6"}, title:"6月29日 (一) 轉戰策馬特", route:"Grindelwald → 策馬特 Zermatt · Gornergrat 🚞",
-  hotel:{ic:"🏨",nm:"Hotel Sarazena",loc:"Zermatt"},
+  hotel:{ic:"🏨",nm:"Hotel Sarazena",loc:"Zermatt",m:"Hotel Sarazena Zermatt"},
   tl:[
     {t:"08:30",x:"Wake up + Check out"},
     {t:"09:17-12:17",x:"乘火車前往 Zermatt (經 Spiez/Visp 轉乘)",s:"$? 已包套票部分 · CHF 41.4",hl:1},
     {t:"12:30",x:"抵達 Zermatt,去酒店寄存行李 + Lunch"},
-    {t:"14:00-14:33",x:"Gornergrat Bahn 登山火車上山 🚞",s:"觀看馬特洪峰最佳視角 · 買定飛 scan QR code · 上山坐右側!",hl:1},
-    {t:"",x:"Gornergrat 觀景台",s:"往觀景台上方走一點,可同時影到高納冰河 Gornergletscher 同葛倫茲冰河 Grenzgletscher 匯流"},
-    {t:"15:31-15:36",x:"Rotenboden 落車,步行5分鐘去 Riffelsee",s:"湖邊影馬特洪峰倒影 🏔💧",hl:1},
-    {t:"16:40",x:"從 Riffelsee 健行約20分鐘落山去 Riffelberg 纜車站正下方",s:"會見到一大群躲太陽嘅懶散黑面羊 🐑"},
+    {t:"14:00-14:33",x:"Gornergrat Bahn 登山火車上山 🚞",s:"觀看馬特洪峰最佳視角 · 買定飛 scan QR code · 上山坐右側!",hl:1,m:"Gornergrat Bahn Zermatt"},
+    {t:"",x:"Gornergrat 觀景台",s:"往觀景台上方走一點,可同時影到高納冰河 Gornergletscher 同葛倫茲冰河 Grenzgletscher 匯流",m:"Gornergrat"},
+    {t:"15:31-15:36",x:"Rotenboden 落車,步行5分鐘去 Riffelsee",s:"湖邊影馬特洪峰倒影 🏔💧",hl:1,m:"Riffelsee"},
+    {t:"16:40",x:"從 Riffelsee 健行約20分鐘落山去 Riffelberg 纜車站正下方",s:"會見到一大群躲太陽嘅懶散黑面羊 🐑",m:"Riffelberg"},
     {t:"17:46-18:05",x:"火車返 Zermatt"},
-    {t:"18:30",x:"Walk & Chill in Zermatt town",s:"班霍夫大道 Bahnhofstrasse · Pfarrkirche St. Mauritius 教堂 · 馬特洪峰觀景台 Matterhorn Viewpoint · 策馬特蘑菇屋"},
+    {t:"18:30",x:"Walk & Chill in Zermatt town",s:"班霍夫大道 Bahnhofstrasse · Pfarrkirche St. Mauritius 教堂 · 馬特洪峰觀景台 Matterhorn Viewpoint · 策馬特蘑菇屋",m:"Bahnhofstrasse Zermatt"},
     {t:"19:30",x:"Dinner"},
   ],
   meals:[
@@ -238,19 +238,19 @@ const DAYS = [
 },
 {
   id:"d0630", date:"2026-06-30", chip:{w:"二",d:"30/6"}, title:"6月30日 (二) 五湖健行 → 意大利", route:"Zermatt 五湖 → Domodossola 🇮🇹",
-  hotel:{ic:"🏨",nm:"Hotel Ristorante Eurossola",loc:"Domodossola"},
+  hotel:{ic:"🏨",nm:"Hotel Ristorante Eurossola",loc:"Domodossola",m:"Hotel Eurossola Domodossola"},
   tl:[
     {t:"05:20-05:50",x:"露台睇日照金山 🌄",s:"日出 05:41",hl:1},
     {t:"07:00?",x:"Wake up + Hotel breakfast"},
     {t:"09:00",x:"Check out"},
-    {t:"09:00-09:25",x:"行去 Zermatt ZBAG-lz 站坐纜車"},
-    {t:"09:30-09:43",x:"搭到 Blauherd 纜車站 (五湖健行 CHF 29.5 Round)"},
-    {t:"",x:"步行20分鐘前往湖1 Stellisee 🏔💧",s:"馬特洪峰倒影名場面",hl:1},
-    {t:"10:40-10:47",x:"Blauherd 搭纜車回 Sunnegga",s:"到 Sunnegga 後可搭免費「電梯纜車」落湖5 Leisee(似搭𨋢咁上落),亦可以由旁邊路散步落去"},
+    {t:"09:00-09:25",x:"行去 Zermatt ZBAG-lz 站坐纜車",m:"Sunnegga Funicular Zermatt"},
+    {t:"09:30-09:43",x:"搭到 Blauherd 纜車站 (五湖健行 CHF 29.5 Round)",m:"Blauherd Zermatt"},
+    {t:"",x:"步行20分鐘前往湖1 Stellisee 🏔💧",s:"馬特洪峰倒影名場面",hl:1,m:"Stellisee"},
+    {t:"10:40-10:47",x:"Blauherd 搭纜車回 Sunnegga",s:"到 Sunnegga 後可搭免費「電梯纜車」落湖5 Leisee(似搭𨋢咁上落),亦可以由旁邊路散步落去",m:"Leisee Zermatt"},
     {t:"~12:00",x:"Lunch @湖5 Leisee"},
-    {t:"13:30-15:00",x:"格納峽谷 Gorner Gorge (Gornerschlucht)",hl:1},
+    {t:"13:30-15:00",x:"格納峽谷 Gorner Gorge (Gornerschlucht)",hl:1,m:"Gornerschlucht Zermatt"},
     {t:"16:06 / 18:37",x:"火車 Zermatt → Domodossola 🇮🇹",s:"Dinner on train · 18:30 / 21:10 到 Domodossola",hl:1},
-    {t:"夜晚",x:"Piazza del Mercato (Citywalk + Dinner)"},
+    {t:"夜晚",x:"Piazza del Mercato (Citywalk + Dinner)",m:"Piazza Mercato Domodossola"},
   ],
   meals:[
     {k:"🌅",b:"Breakfast",v:"Hotel 早餐"},
@@ -389,12 +389,15 @@ const tabsEl = $("#tabs"), mainEl = $("#main");
 
 function esc(s){return s||""}
 
+const gm = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const pin = q => q ? ` <a class="mlink" href="${gm(q)}" target="_blank" rel="noopener" title="喺 Google Maps 開">📍</a>` : "";
+
 function renderDay(d){
   let h = `<section class="section" id="${d.id}">`;
   h += `<div class="dayhead"><h2>${d.title}</h2><div class="route">${d.route}</div>`;
   if(d.badge) h += `<span class="badge ${d.badge.c}">${d.badge.t}</span>`;
   h += `</div>`;
-  if(d.hotel) h += `<div class="card"><div class="hotel"><div class="ic">${d.hotel.ic}</div><div><div class="nm">${d.hotel.nm}</div><div class="loc">${d.hotel.loc}</div></div></div></div>`;
+  if(d.hotel) h += `<div class="card"><div class="hotel"><div class="ic">${d.hotel.ic}</div><div><div class="nm">${d.hotel.nm}${pin(d.hotel.m)}</div><div class="loc">${d.hotel.loc}</div></div></div></div>`;
   if(d.links && d.links.length){
     h += `<div class="card"><h3>🔗 快速連結 (Live Cam / 訂票)</h3><div class="linkrow">`;
     d.links.forEach(L=>{ h += `<a class="btn ${L.c}" href="${L.u}" target="_blank" rel="noopener">${L.l}</a>`; });
@@ -403,13 +406,13 @@ function renderDay(d){
   if(d.tl && d.tl.length){
     h += `<div class="card"><h3>🕐 行程時間表</h3><div class="tl">`;
     d.tl.forEach(i=>{
-      h += `<div class="ti${i.hl?" hl":""}"><div class="t">${esc(i.t)}</div><div class="x">${i.x}${i.s?`<small>${i.s}</small>`:""}</div></div>`;
+      h += `<div class="ti${i.hl?" hl":""}"><div class="t">${esc(i.t)}</div><div class="x">${i.x}${pin(i.m)}${i.s?`<small>${i.s}</small>`:""}</div></div>`;
     });
     h += `</div></div>`;
   }
   if(d.meals && d.meals.length){
     h += `<div class="card"><h3>🍽 餐飲安排</h3><div class="meals">`;
-    d.meals.forEach(m=>{ h += `<div class="meal"><div class="k">${m.k}</div><div class="v"><b>${m.b}</b>${m.v}</div></div>`; });
+    d.meals.forEach(m=>{ h += `<div class="meal"><div class="k">${m.k}</div><div class="v"><b>${m.b}</b>${m.v}${pin(m.m)}</div></div>`; });
     h += `</div></div>`;
   }
   if(d.costs && d.costs.length){
