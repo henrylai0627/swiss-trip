@@ -51,6 +51,32 @@ main{max-width:640px; margin:0 auto; padding:12px 12px 40px}
 .ti .x small{display:block; color:var(--sub); font-size:12px; margin-top:2px}
 a.mlink{text-decoration:none; font-size:12px; margin-left:4px; vertical-align:baseline; white-space:nowrap}
 .ti.hl .x{font-weight:600}
+.ti.now{background:#fff1f0; border-radius:10px; padding:7px 8px; margin:0 -8px; border-bottom-color:transparent; box-shadow:inset 3px 0 0 var(--red)}
+.ti.now .t::before{content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--red); margin-right:5px; animation:nowpulse 1.6s ease-in-out infinite}
+@keyframes nowpulse{0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.35; transform:scale(.75)}}
+#nextbar{display:none; background:var(--red-dark); color:#fff; font-size:12.5px; padding:7px 14px 9px; cursor:pointer; line-height:1.35}
+#nextbar b{font-size:13.5px}
+.wx{font-size:12.5px; color:var(--sub); margin-top:4px}
+.att{display:flex; gap:6px; align-items:center; margin-top:7px}
+.att .ref{flex:1; min-width:0}
+input.inf, .exp-form input, .exp-form select{border:1px solid var(--line); border-radius:9px; padding:7px 9px; font-size:13px; background:var(--bg); color:var(--text); font-family:inherit}
+input.inf{width:100%; margin-top:5px}
+.attbtn{background:none; border:1px dashed var(--sub); border-radius:9px; padding:6px 9px; font-size:13px; color:var(--sub); cursor:pointer}
+.thumb{width:42px; height:42px; object-fit:cover; border-radius:8px; border:1px solid var(--line); vertical-align:middle; cursor:pointer}
+.rmatt, .expdel{background:none; border:none; color:var(--sub); font-size:14px; padding:4px 6px; cursor:pointer}
+#qrmodal{position:fixed; inset:0; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; z-index:99}
+#qrmodal img{max-width:92vw; max-height:82vh; border-radius:12px; background:#fff}
+.exp-form{display:flex; gap:6px; margin-top:2px}
+.addbtn{background:var(--red); color:#fff; border:none; border-radius:9px; padding:8px 16px; font-weight:700; font-size:14px; cursor:pointer}
+.exp-row{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:14px}
+.exp-row:last-child{border-bottom:none}
+.exp-rates{font-size:12.5px; color:var(--sub); margin-top:10px}
+.exp-rates input{width:60px; border:1px solid var(--line); border-radius:7px; padding:4px 6px; background:var(--bg); color:var(--text)}
+.frow{padding:9px 0; border-bottom:1px solid var(--line); font-size:14px; line-height:1.5}
+.frow:last-child{border-bottom:none}
+.frow small{color:var(--sub)}
+.frow a.tel{color:var(--cam); text-decoration:none; font-weight:600}
+#exp-total{font-size:14px}
 .linkrow{display:flex; flex-wrap:wrap; gap:8px}
 a.btn{display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size:13px; font-weight:600; padding:9px 12px; border-radius:12px; color:#fff; line-height:1.2}
 a.btn.cam{background:var(--cam)}
@@ -85,6 +111,7 @@ footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
   .tips, .spot p{color:#c7cad1}
   .badge.bday{background:#3f1d31}
   .badge.flight{background:#12303f}
+  .ti.now{background:#33201d}
 }
 </style>
 </head>
@@ -95,17 +122,22 @@ footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
     <span class="sub">2026/6/25 – 7/5</span>
   </div>
   <div id="tabs"></div>
+  <div id="nextbar"></div>
 </header>
 <main id="main"></main>
 <footer>BB &amp; Henry · Switzerland + Milano 2026 ❤️</footer>
+<div id="qrmodal"><img alt="ticket"></div>
+<input type="file" id="attfile" accept="image/*" hidden>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 const gm = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 const pin = q => q ? ` <a class="mlink" href="${gm(q)}" target="_blank" rel="noopener" title="喺 Google Maps 開">📍</a>` : "";
 
 const DAYS = [
 {
-  id:"d0625", date:"2026-06-25", chip:{w:"四",d:"25/6"}, title:"6月25日 (四) 出發日", route:"香港 → 機場", badge:{t:"✈️ 夜機",c:"flight"}, hotel:{ic:"✈️",nm:"On Plane",loc:"CX383 凌晨起飛"},
+  id:"d0625", date:"2026-06-25", tz:"Asia/Hong_Kong", wx:{lat:22.32, lon:114.17, name:"香港"}, chip:{w:"四",d:"25/6"}, title:"6月25日 (四) 出發日", route:"香港 → 機場", badge:{t:"✈️ 夜機",c:"flight"}, hotel:{ic:"✈️",nm:"On Plane",loc:"CX383 凌晨起飛"},
   tl:[
     {t:"19:30",x:"沖涼 + Dinner"},
     {t:"21:00",x:"搭 A47X 去機場"},
@@ -117,7 +149,7 @@ const DAYS = [
   links:[]
 },
 {
-  id:"d0626", date:"2026-06-26", chip:{w:"五",d:"26/6"}, title:"6月26日 (五) 抵達瑞士", route:"HKG → 蘇黎世 ZRH → 因特拉肯 Interlaken → 格林德瓦", badge:{t:"✈️ CX383 00:25 起飛",c:"flight"},
+  id:"d0626", date:"2026-06-26", tz:"Europe/Zurich", wx:{lat:46.686, lon:7.863, name:"Interlaken"}, chip:{w:"五",d:"26/6"}, title:"6月26日 (五) 抵達瑞士", route:"HKG → 蘇黎世 ZRH → 因特拉肯 Interlaken → 格林德瓦", badge:{t:"✈️ CX383 00:25 起飛",c:"flight"},
   hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald (今晚起住3晚)",m:"Hotel Bellevue-Pinte Grindelwald"},
   tl:[
     {t:"00:25",x:"HKG 起飛 (CX383,13hr 5m)",s:"Breakfast 喺機上食"},
@@ -151,7 +183,7 @@ const DAYS = [
   ]
 },
 {
-  id:"d0627", date:"2026-06-27", chip:{w:"六",d:"27/6"}, title:"6月27日 (六) First 冒險日", route:"格林德瓦 Grindelwald · First", badge:{t:"🎂 BB 30th Birthday!",c:"bday"},
+  id:"d0627", date:"2026-06-27", tz:"Europe/Zurich", wx:{lat:46.624, lon:8.034, name:"Grindelwald"}, chip:{w:"六",d:"27/6"}, title:"6月27日 (六) First 冒險日", route:"格林德瓦 Grindelwald · First", badge:{t:"🎂 BB 30th Birthday!",c:"bday"},
   hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald"},
   tl:[
     {t:"07:30",x:"Wake up ⏰"},
@@ -178,7 +210,7 @@ const DAYS = [
   ]
 },
 {
-  id:"d0628", date:"2026-06-28", chip:{w:"日",d:"28/6"}, title:"6月28日 (日) 少女峰", route:"Jungfraujoch — Top of Europe 🏔",
+  id:"d0628", date:"2026-06-28", tz:"Europe/Zurich", wx:{lat:46.547, lon:7.962, name:"少女峰"}, chip:{w:"日",d:"28/6"}, title:"6月28日 (日) 少女峰", route:"Jungfraujoch — Top of Europe 🏔",
   hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald"},
   tl:[
     {t:"06:45",x:"Wake up ⏰"},
@@ -210,7 +242,7 @@ const DAYS = [
   ]
 },
 {
-  id:"d0629", date:"2026-06-29", chip:{w:"一",d:"29/6"}, title:"6月29日 (一) 轉戰策馬特", route:"Grindelwald → 策馬特 Zermatt · Gornergrat 🚞",
+  id:"d0629", date:"2026-06-29", tz:"Europe/Zurich", wx:{lat:46.020, lon:7.749, name:"Zermatt"}, chip:{w:"一",d:"29/6"}, title:"6月29日 (一) 轉戰策馬特", route:"Grindelwald → 策馬特 Zermatt · Gornergrat 🚞",
   hotel:{ic:"🏨",nm:"Hotel Sarazena",loc:"Zermatt",m:"Hotel Sarazena Zermatt"},
   tl:[
     {t:"08:30",x:"Wake up + Check out"},
@@ -240,7 +272,7 @@ const DAYS = [
   ]
 },
 {
-  id:"d0630", date:"2026-06-30", chip:{w:"二",d:"30/6"}, title:"6月30日 (二) 五湖健行 → 意大利", route:"Zermatt 五湖 → Domodossola 🇮🇹",
+  id:"d0630", date:"2026-06-30", tz:"Europe/Zurich", wx:{lat:46.020, lon:7.749, name:"Zermatt"}, chip:{w:"二",d:"30/6"}, title:"6月30日 (二) 五湖健行 → 意大利", route:"Zermatt 五湖 → Domodossola 🇮🇹",
   hotel:{ic:"🏨",nm:"Hotel Ristorante Eurossola",loc:"Domodossola",m:"Hotel Eurossola Domodossola"},
   tl:[
     {t:"05:20-05:50",x:"露台睇日照金山 🌄",s:"日出 05:41",hl:1},
@@ -273,7 +305,7 @@ const DAYS = [
   ]
 },
 {
-  id:"d0701", date:"2026-07-01", chip:{w:"三",d:"1/7"}, title:"7月1日 (三) 米蘭", route:"Domodossola → Milano 🇮🇹",
+  id:"d0701", date:"2026-07-01", tz:"Europe/Rome", wx:{lat:45.464, lon:9.190, name:"Milano"}, chip:{w:"三",d:"1/7"}, title:"7月1日 (三) 米蘭", route:"Domodossola → Milano 🇮🇹",
   hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano (住3晚)",m:"Hotel Bristol Milano"},
   tl:[
     {t:"08:56-10:30",x:"火車 Domodossola → Milano ($216.25/2人)",hl:1},
@@ -296,7 +328,7 @@ const DAYS = [
   links:[]
 },
 {
-  id:"d0702", date:"2026-07-02", chip:{w:"四",d:"2/7"}, title:"7月2日 (四) 威尼斯一日遊", route:"Milano ⇄ Venezia 🚤",
+  id:"d0702", date:"2026-07-02", tz:"Europe/Rome", wx:{lat:45.438, lon:12.327, name:"Venezia"}, chip:{w:"四",d:"2/7"}, title:"7月2日 (四) 威尼斯一日遊", route:"Milano ⇄ Venezia 🚤",
   hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano",m:"Hotel Bristol Milano"},
   tl:[
     {t:"09:35-12:03",x:"火車去 Venezia S.Lucia ($595.21/2人 Round)",hl:1,m:"Venezia Santa Lucia"},
@@ -317,7 +349,7 @@ const DAYS = [
   ]
 },
 {
-  id:"d0703", date:"2026-07-03", chip:{w:"五",d:"3/7"}, title:"7月3日 (五) 科莫湖", route:"Milano → Varenna ⇄ Bellagio 🛥",
+  id:"d0703", date:"2026-07-03", tz:"Europe/Rome", wx:{lat:45.985, lon:9.262, name:"Bellagio"}, chip:{w:"五",d:"3/7"}, title:"7月3日 (五) 科莫湖", route:"Milano → Varenna ⇄ Bellagio 🛥",
   hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano",m:"Hotel Bristol Milano"},
   tl:[
     {t:"朝早",x:"火車 Milano → Varenna",s:"⚠️ 睇咗天氣好先買飛!前一日喺 Trenord 買",hl:1,m:"Varenna-Esino railway station"},
@@ -338,7 +370,7 @@ const DAYS = [
   ]
 },
 {
-  id:"d0704", date:"2026-07-04", chip:{w:"六",d:"4/7"}, title:"7月4日 (六) 返屋企", route:"MXP → AUH → HKG", badge:{t:"✈️ EY82 + EY870",c:"flight"},
+  id:"d0704", date:"2026-07-04", tz:"Europe/Rome", wx:{lat:45.464, lon:9.190, name:"Milano"}, chip:{w:"六",d:"4/7"}, title:"7月4日 (六) 返屋企", route:"MXP → AUH → HKG", badge:{t:"✈️ EY82 + EY870",c:"flight"},
   hotel:{ic:"✈️",nm:"On Plane",loc:"Etihad 經 Abu Dhabi"},
   tl:[
     {t:"07:30",x:"Final Breakfast + Check out"},
@@ -354,7 +386,7 @@ const DAYS = [
   links:[]
 },
 {
-  id:"d0705", date:"2026-07-05", chip:{w:"日",d:"5/7"}, title:"7月5日 (日) 到家", route:"HKG → Home 🏠",
+  id:"d0705", date:"2026-07-05", tz:"Asia/Hong_Kong", wx:{lat:22.32, lon:114.17, name:"香港"}, chip:{w:"日",d:"5/7"}, title:"7月5日 (日) 到家", route:"HKG → Home 🏠",
   hotel:{ic:"🏠",nm:"Home Sweet Home",loc:""},
   tl:[
     {t:"09:00",x:"到 HKG ✈️"},
@@ -395,6 +427,7 @@ function esc(s){return s||""}
 function renderDay(d){
   let h = `<section class="section" id="${d.id}">`;
   h += `<div class="dayhead"><h2>${d.title}</h2><div class="route">${d.route}</div>`;
+  if(d.wx) h += `<div class="wx" id="wx-${d.id}"></div>`;
   if(d.badge) h += `<span class="badge ${d.badge.c}">${d.badge.t}</span>`;
   h += `</div>`;
   if(d.hotel) h += `<div class="card"><div class="hotel"><div class="ic">${d.hotel.ic}</div><div><div class="nm">${d.hotel.nm}${pin(d.hotel.m)}</div><div class="loc">${d.hotel.loc}</div></div></div></div>`;
@@ -431,7 +464,7 @@ function renderTasks(){
   let h = `<section class="section" id="tasks"><div class="dayhead"><h2>✅ 待辦清單</h2><div class="route">買飛 / 預訂 checklist(勾選會自動儲存)</div></div><div class="card">`;
   TASKS.forEach(t=>{
     const link = t.u ? ` <a href="${t.u}" target="_blank" rel="noopener">🔗 ${t.ul}</a>` : "";
-    h += `<div class="chk" data-id="${t.id}"><input type="checkbox" id="${t.id}"><label for="${t.id}">${t.x}${link}</label></div>`;
+    h += `<div class="chk" data-id="${t.id}"><input type="checkbox" id="${t.id}"><div style="flex:1; min-width:0"><label for="${t.id}">${t.x}${link}</label><div class="att"><input class="ref inf" type="text" placeholder="Booking ref / 票號" data-k="ref-${t.id}"><button class="attbtn" data-t="${t.id}" title="附加飛/QR截圖">📎</button><span id="th-${t.id}"></span></div></div></div>`;
   });
   h += `</div>`;
   h += `<div class="note"><b>💡 SBB App 買飛貼士</b><br>喺 SBB App 買火車票時,喺乘客設定 (Passenger) 入面將折扣選項剔選 <b>「Half-Fare travelcard 1/2」</b>,系統就會自動半價結算。</div>`;
@@ -442,13 +475,66 @@ function renderTasks(){
   return h;
 }
 
+const FLIGHTS = [
+  {f:"CX383", r:"HKG → ZRH 蘇黎世", d:"26/6 00:25 → 07:30"},
+  {f:"EY82", r:"MXP 米蘭 → AUH 阿布扎比", d:"4/7 11:40 → 19:40"},
+  {f:"EY870", r:"AUH → HKG", d:"4/7 21:10 → 5/7 09:00"},
+];
+const HOTELS = [
+  {nm:"Hotel Bellevue Pinte", loc:"Grindelwald", dt:"26–29/6 · 3晚", m:"Hotel Bellevue-Pinte Grindelwald"},
+  {nm:"Hotel Sarazena", loc:"Zermatt", dt:"29–30/6 · 1晚", m:"Hotel Sarazena Zermatt"},
+  {nm:"Hotel Ristorante Eurossola", loc:"Domodossola", dt:"30/6–1/7 · 1晚", m:"Hotel Eurossola Domodossola"},
+  {nm:"Hotel Bristol", loc:"Milano", dt:"1–4/7 · 3晚", m:"Hotel Bristol Milano"},
+];
+
+function renderExpenses(){
+  let h = `<section class="section" id="exps"><div class="dayhead"><h2>💰 使費記錄</h2><div class="route">記低實際使咗幾多(自動存喺部機)</div></div>`;
+  h += `<div class="card"><h3>➕ 新增一筆</h3><div class="exp-form">
+    <input id="exp-a" type="number" inputmode="decimal" placeholder="金額" style="flex:1; min-width:0">
+    <select id="exp-c"><option>CHF</option><option>EUR</option><option>HKD</option></select>
+    <button id="exp-add" class="addbtn">加</button></div>
+    <div class="exp-form"><input id="exp-n" type="text" placeholder="買咗咩 (e.g. 纜車飛 / Coop)" style="flex:1; min-width:0"></div></div>`;
+  h += `<div class="card"><h3>📒 記錄</h3><div id="exp-list"></div></div>`;
+  h += `<div class="card"><h3>📊 總計</h3><div id="exp-total"></div>
+    <div class="exp-rates">匯率: 1 CHF = <input id="rate-CHF" type="number" step="0.01" inputmode="decimal"> HKD · 1 EUR = <input id="rate-EUR" type="number" step="0.01" inputmode="decimal"> HKD</div></div>`;
+  h += `</section>`;
+  return h;
+}
+
+function renderInfo(){
+  let h = `<section class="section" id="infos"><div class="dayhead"><h2>ℹ️ 重要資料</h2><div class="route">航班 / 酒店 / 緊急電話(欄位可以自己填,離線都睇到)</div></div>`;
+  h += `<div class="card"><h3>☁️ 兩部機同步</h3>
+    <div id="sync-status" class="frow" style="border:none; padding-top:0">…</div>
+    <div class="frow" style="border:none"><small>開 app 自動同步,唔使設定 — 兩部機即時互通:✅ checklist、booking ref、ℹ️ 資料欄位、💰 使費、📎 票截圖。(進階:想用自己嘅房號先填下面)</small></div>
+    <div class="exp-form"><input id="room-in" type="text" placeholder="自訂房號 (進階,最少8個字)" style="flex:1; min-width:0"><button id="room-btn" class="addbtn">轉</button></div></div>`;
+  h += `<div class="card"><h3>✈️ 航班</h3>`;
+  FLIGHTS.forEach((f,i)=>{ h += `<div class="frow"><b>${f.f}</b> ${f.r}<br><small>${f.d}</small><input class="inf" data-k="flight-${i}" placeholder="Booking ref / 座位"></div>`; });
+  h += `</div>`;
+  h += `<div class="card"><h3>🏨 酒店</h3>`;
+  HOTELS.forEach((ht,i)=>{ h += `<div class="frow"><b>${ht.nm}</b>${pin(ht.m)}<br><small>${ht.loc} · ${ht.dt}</small><input class="inf" data-k="hotel-${i}" placeholder="Booking ref / 電話 / 地址"></div>`; });
+  h += `</div>`;
+  h += `<div class="card"><h3>🚨 緊急電話</h3>
+    <div class="frow">🇨🇭 瑞士:<a class="tel" href="tel:112">112</a>(通用)· <a class="tel" href="tel:117">117</a>(警察)· <a class="tel" href="tel:144">144</a>(救護)· <a class="tel" href="tel:1414">1414</a>(REGA 山區直升機救援)</div>
+    <div class="frow">🇮🇹 意大利:<a class="tel" href="tel:112">112</a>(通用)· <a class="tel" href="tel:118">118</a>(救護)</div>
+    <div class="frow">🇭🇰 入境處在外協助港人熱線:<a class="tel" href="tel:+85218682">(852) 1868</a></div></div>`;
+  h += `<div class="card"><h3>🛡 保險 / 其他</h3>
+    <div class="frow">旅遊保險<input class="inf" data-k="ins-co" placeholder="保險公司 + 24hr 緊急電話"><input class="inf" data-k="ins-no" placeholder="保單號碼"></div>
+    <div class="frow">Half Fare Card<input class="inf" data-k="hfc" placeholder="卡號 / 備註 — 記得隨身帶!"></div>
+    <div class="frow">其他備註<input class="inf" data-k="misc" placeholder="e.g. 轉插喺邊個袋"></div></div>`;
+  h += `</section>`;
+  return h;
+}
+
 // build
 let tabsHtml = "";
 DAYS.forEach(d=>{ tabsHtml += `<button class="tab" data-target="${d.id}"><span>${d.chip.w}</span><b>${d.chip.d}</b></button>`; });
 tabsHtml += `<button class="tab tasks-tab" data-target="tasks"><span>清單</span><b>✅</b></button>`;
+tabsHtml += `<button class="tab" data-target="exps"><span>使費</span><b>💰</b></button>`;
+tabsHtml += `<button class="tab" data-target="infos"><span>資料</span><b>ℹ️</b></button>`;
 tabsEl.innerHTML = tabsHtml;
-mainEl.innerHTML = DAYS.map(renderDay).join("") + renderTasks();
+mainEl.innerHTML = DAYS.map(renderDay).join("") + renderTasks() + renderExpenses() + renderInfo();
 
+let currentId = null;
 function show(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active", s.id===id));
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.target===id));
@@ -456,6 +542,10 @@ function show(id){
   if(tab) tab.scrollIntoView({inline:"center", behavior:"smooth", block:"nearest"});
   window.scrollTo({top:0});
   localStorage.setItem("lastDay", id);
+  currentId = id;
+  // auto-scroll to the "now" row if this day is live
+  const nowRow = document.querySelector(`#${id} .ti.now`);
+  if(nowRow) setTimeout(()=>nowRow.scrollIntoView({block:"center", behavior:"smooth"}), 150);
 }
 tabsEl.addEventListener("click", e=>{
   const b = e.target.closest(".tab"); if(b) show(b.dataset.target);
@@ -463,24 +553,371 @@ tabsEl.addEventListener("click", e=>{
 
 // checklist persistence
 const saved = JSON.parse(localStorage.getItem("tasks")||"{}");
-document.querySelectorAll(".chk input").forEach(cb=>{
+document.querySelectorAll(".chk input[type=checkbox]").forEach(cb=>{
   cb.checked = !!saved[cb.id];
   cb.closest(".chk").classList.toggle("done", cb.checked);
   cb.addEventListener("change", ()=>{
     saved[cb.id] = cb.checked;
     localStorage.setItem("tasks", JSON.stringify(saved));
     cb.closest(".chk").classList.toggle("done", cb.checked);
+    pushSync({tasks:{[cb.id]: cb.checked}});
   });
 });
 
-// default day: today if within trip, else first day / last viewed
+// destination local time: returns {date:"YYYY-MM-DD", min: minutes since midnight}
+function nowIn(tz){
+  try{
+    const parts = new Intl.DateTimeFormat("en-CA",{timeZone:tz, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hourCycle:"h23"}).formatToParts(new Date());
+    const g = t => parts.find(p=>p.type===t).value;
+    return {date:`${g("year")}-${g("month")}-${g("day")}`, min: (+g("hour"))*60 + (+g("minute"))};
+  }catch(e){
+    const d = new Date();
+    return {date:d.toISOString().slice(0,10), min:d.getHours()*60+d.getMinutes()};
+  }
+}
+
+// highlight the timeline item happening right now (destination local time)
+function updateNow(){
+  document.querySelectorAll(".ti.now").forEach(el=>el.classList.remove("now"));
+  DAYS.forEach(d=>{
+    if(!d.tl || !d.tl.length) return;
+    const n = nowIn(d.tz||"Europe/Zurich");
+    if(n.date !== d.date) return;
+    const rows = document.querySelectorAll(`#${d.id} .ti`);
+    const starts = d.tl.map(i=>{
+      const m = (i.t||"").match(/(\d{1,2}):(\d{2})/);
+      return m ? (+m[1])*60 + (+m[2]) : null;
+    });
+    // current = last timed item that has already started
+    let cur = -1;
+    for(let i=0;i<starts.length;i++){
+      if(starts[i]===null) continue;
+      if(starts[i] <= n.min) cur = i; else break;
+    }
+    if(cur < 0) return;
+    // if that item's own range has ended and untimed items follow, move on to them
+    const tm = (d.tl[cur].t||"").match(/(\d{1,2}):(\d{2})\D+(\d{1,2}):(\d{2})/);
+    const end = tm ? (+tm[3])*60 + (+tm[4]) : null;
+    const marks = [cur];
+    if(end!==null && end <= n.min){
+      const follow = [];
+      for(let i=cur+1; i<starts.length && starts[i]===null; i++) follow.push(i);
+      if(follow.length){ marks.length = 0; marks.push(...follow); }
+    }
+    marks.forEach(i=>{ if(rows[i]) rows[i].classList.add("now"); });
+  });
+  updateNextBar();
+}
+
+const fmtMin = m => m<60 ? `${m} 分鐘` : `${Math.floor(m/60)} 小時${m%60 ? " "+(m%60)+" 分" : ""}`;
+
+// countdown bar: next upcoming timed item today (destination local time)
+function updateNextBar(){
+  const bar = document.querySelector("#nextbar");
+  if(!bar) return;
+  let nx = null;
+  for(const d of DAYS){
+    if(!d.tl || !d.tl.length) continue;
+    const n = nowIn(d.tz||"Europe/Zurich");
+    if(n.date !== d.date) continue;
+    for(let i=0;i<d.tl.length;i++){
+      const m = (d.tl[i].t||"").match(/(\d{1,2}):(\d{2})/);
+      if(!m) continue;
+      const st = (+m[1])*60 + (+m[2]);
+      if(st > n.min){
+        const txt = d.tl[i].x.replace(/<[^>]*>/g,"");
+        nx = {id:d.id, idx:i, mins:st-n.min, hh:m[0], txt: txt.length>32 ? txt.slice(0,32)+"…" : txt};
+        break;
+      }
+    }
+    if(nx) break;
+  }
+  if(nx){
+    bar.innerHTML = `⏰ <b>${fmtMin(nx.mins)}</b>後 · ${nx.hh} ${nx.txt}`;
+    bar.dataset.day = nx.id; bar.dataset.idx = nx.idx;
+    bar.style.display = "block";
+  }else{
+    bar.style.display = "none";
+  }
+}
+updateNow();
+setInterval(updateNow, 30000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) updateNow(); });
+
+// default day: today (destination local time) if within trip, else last viewed / first day
 (function(){
-  const today = new Date().toISOString().slice(0,10);
-  const match = DAYS.find(d=>d.date===today);
+  const match = DAYS.find(d=> nowIn(d.tz||"Europe/Zurich").date === d.date);
   if(match){ show(match.id); return; }
   const last = localStorage.getItem("lastDay");
   if(last && document.getElementById(last)){ show(last); return; }
   show(DAYS[0].id);
+})();
+
+// ---- countdown bar tap → jump to that item ----
+$("#nextbar").addEventListener("click", ()=>{
+  const b = $("#nextbar");
+  if(!b.dataset.day) return;
+  show(b.dataset.day);
+  const r = document.querySelectorAll(`#${b.dataset.day} .ti`)[+b.dataset.idx];
+  if(r) setTimeout(()=>r.scrollIntoView({block:"center", behavior:"smooth"}), 150);
+});
+
+// ---- weather (Open-Meteo, free, no key; cached 3hr in localStorage) ----
+const WXEMO = c => c===0?"☀️" : c<=2?"🌤️" : c===3?"☁️" : c<=48?"🌫️" : c<=57?"🌦️" : c<=67?"🌧️" : c<=77?"🌨️" : c<=82?"🌧️" : c<=86?"🌨️" : "⛈️";
+async function loadWeather(){
+  for(const d of DAYS){
+    if(!d.wx) continue;
+    const el = document.getElementById("wx-"+d.id);
+    if(!el) continue;
+    const ck = "wx-"+d.date;
+    let cached = null;
+    try{ cached = JSON.parse(localStorage.getItem(ck)||"null"); }catch(e){}
+    if(cached) el.innerHTML = cached.h;
+    if(cached && Date.now()-cached.t < 3*3600*1000) continue;
+    try{
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${d.wx.lat}&longitude=${d.wx.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&start_date=${d.date}&end_date=${d.date}`);
+      const j = await r.json();
+      if(!j.daily || j.daily.weather_code == null || j.daily.weather_code[0] == null) continue;
+      const pp = j.daily.precipitation_probability_max ? j.daily.precipitation_probability_max[0] : null;
+      const h = `${WXEMO(j.daily.weather_code[0])} ${d.wx.name} ${Math.round(j.daily.temperature_2m_max[0])}° / ${Math.round(j.daily.temperature_2m_min[0])}°${pp!=null ? ` · ☔️ ${pp}%` : ""}`;
+      el.innerHTML = h;
+      localStorage.setItem(ck, JSON.stringify({t:Date.now(), h}));
+    }catch(e){ /* offline / 太早未有預報 → 唔顯示 */ }
+  }
+}
+loadWeather();
+
+// ---- editable info fields (資料頁 + 清單 booking ref) ----
+const INF = JSON.parse(localStorage.getItem("inf")||"{}");
+const infTimers = {};
+document.querySelectorAll("input.inf").forEach(inp=>{
+  inp.value = INF[inp.dataset.k]||"";
+  inp.addEventListener("input", ()=>{
+    const k = inp.dataset.k;
+    INF[k] = inp.value;
+    localStorage.setItem("inf", JSON.stringify(INF));
+    clearTimeout(infTimers[k]);
+    infTimers[k] = setTimeout(()=>pushSync({inf:{[k]: INF[k]}}), 800);
+  });
+});
+
+// ---- ticket / QR attachments on tasks ----
+const attfile = $("#attfile"), qrmodal = $("#qrmodal");
+let pendingAtt = null;
+function drawThumb(tid){
+  const el = document.getElementById("th-"+tid);
+  if(!el) return;
+  const img = localStorage.getItem("att-"+tid);
+  el.innerHTML = img ? `<img class="thumb" data-t="${tid}" src="${img}"><button class="rmatt" data-t="${tid}" title="刪除">✕</button>` : "";
+}
+TASKS.forEach(t=>drawThumb(t.id));
+mainEl.addEventListener("click", e=>{
+  const ab = e.target.closest(".attbtn");
+  if(ab){ pendingAtt = ab.dataset.t; attfile.click(); return; }
+  if(e.target.classList && e.target.classList.contains("thumb")){
+    qrmodal.querySelector("img").src = e.target.src;
+    qrmodal.style.display = "flex";
+    return;
+  }
+  const rm = e.target.closest(".rmatt");
+  if(rm && confirm("刪除呢張附件?")){
+    localStorage.removeItem("att-"+rm.dataset.t);
+    drawThumb(rm.dataset.t);
+    if(attCol) attCol.doc(rm.dataset.t).delete().catch(()=>{});
+  }
+});
+qrmodal.addEventListener("click", ()=>{ qrmodal.style.display = "none"; });
+attfile.addEventListener("change", ()=>{
+  const f = attfile.files[0];
+  if(!f || !pendingAtt) return;
+  const tid = pendingAtt; pendingAtt = null;
+  const img = new Image();
+  img.onload = ()=>{
+    const M = 1000, s = Math.min(1, M/Math.max(img.width, img.height));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(img.width*s); cv.height = Math.round(img.height*s);
+    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    URL.revokeObjectURL(img.src);
+    const data = cv.toDataURL("image/jpeg", .82);
+    try{ localStorage.setItem("att-"+tid, data); drawThumb(tid); }
+    catch(e){ alert("存唔到,相片太大 😅 試下 screenshot 細啲"); return; }
+    if(attCol) attCol.doc(tid).set({img:data}).catch(()=>{});
+  };
+  img.src = URL.createObjectURL(f);
+  attfile.value = "";
+});
+
+// ---- expenses ----
+const escT = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+let EXPS = JSON.parse(localStorage.getItem("exps")||"[]");
+const RATES = Object.assign({CHF:9.7, EUR:9.2}, JSON.parse(localStorage.getItem("rates")||"{}"));
+function refreshExp(){
+  const list = $("#exp-list"), tot = $("#exp-total");
+  list.innerHTML = EXPS.length
+    ? EXPS.map((x,i)=>`<div class="exp-row"><div style="flex:1"><b>${x.c} ${(+x.a).toFixed(1)}</b>${x.n?` ${escT(x.n)}`:""}<small style="color:var(--sub)"> · ${x.d}</small></div><button class="expdel" data-i="${i}">✕</button></div>`).join("")
+    : `<div style="color:var(--sub); font-size:13px">未有記錄</div>`;
+  const sums = {};
+  EXPS.forEach(x=>{ sums[x.c] = (sums[x.c]||0) + (+x.a||0); });
+  const hkd = (sums.HKD||0) + (sums.CHF||0)*RATES.CHF + (sums.EUR||0)*RATES.EUR;
+  tot.innerHTML = EXPS.length
+    ? Object.keys(sums).map(c=>`${c} ${sums[c].toFixed(1)}`).join(" + ") + ` ≈ <b>HKD ${hkd.toFixed(0)}</b>`
+    : "—";
+}
+$("#exp-add").addEventListener("click", ()=>{
+  const a = parseFloat($("#exp-a").value);
+  if(!a){ $("#exp-a").focus(); return; }
+  const dt = new Date();
+  EXPS.push({a, c:$("#exp-c").value, n:$("#exp-n").value.trim(), d:`${dt.getDate()}/${dt.getMonth()+1} ${String(dt.getHours()).padStart(2,"0")}:${String(dt.getMinutes()).padStart(2,"0")}`});
+  localStorage.setItem("exps", JSON.stringify(EXPS));
+  $("#exp-a").value = ""; $("#exp-n").value = "";
+  refreshExp();
+  pushSync({exps:EXPS});
+});
+$("#exp-list").addEventListener("click", e=>{
+  const b = e.target.closest(".expdel");
+  if(b && confirm("刪除呢筆?")){ EXPS.splice(+b.dataset.i, 1); localStorage.setItem("exps", JSON.stringify(EXPS)); refreshExp(); pushSync({exps:EXPS}); }
+});
+["CHF","EUR"].forEach(c=>{
+  const inp = $("#rate-"+c);
+  inp.value = RATES[c];
+  inp.addEventListener("input", ()=>{
+    RATES[c] = parseFloat(inp.value)||0;
+    localStorage.setItem("rates", JSON.stringify(RATES));
+    refreshExp();
+    clearTimeout(infTimers["rate"+c]);
+    infTimers["rate"+c] = setTimeout(()=>pushSync({rates:RATES}), 800);
+  });
+});
+refreshExp();
+
+// ---- swipe left/right to change section ----
+(function(){
+  const order = DAYS.map(d=>d.id).concat(["tasks","exps","infos"]);
+  let tx = 0, ty = 0, ok = false;
+  document.addEventListener("touchstart", e=>{
+    ok = !e.target.closest("input, select, textarea, #tabs, #qrmodal");
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener("touchend", e=>{
+    if(!ok) return;
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if(Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy)*1.7) return;
+    const i = order.indexOf(currentId);
+    const j = i + (dx < 0 ? 1 : -1);
+    if(i >= 0 && j >= 0 && j < order.length) show(order[j]);
+  }, {passive:true});
+})();
+
+// ---- cloud sync (Firebase Firestore, 房號配對) ----
+const FBCONF = {
+  apiKey: "AIzaSyBZrWb2ggq5FNDXmACRZu8AikY05KUxB90",
+  authDomain: "swiss-trip-9069a.firebaseapp.com",
+  projectId: "swiss-trip-9069a",
+  storageBucket: "swiss-trip-9069a.firebasestorage.app",
+  messagingSenderId: "857831115654",
+  appId: "1:857831115654:web:2d0c88682e7c649938fa07"
+};
+const DEFAULT_ROOM = "bbhenry-swiss26-kq84z";
+let db = null, roomRef = null, attCol = null;
+
+function setSyncStatus(html){
+  const el = document.getElementById("sync-status");
+  if(el) el.innerHTML = html;
+}
+
+function pushSync(patch){
+  if(roomRef) roomRef.set(patch, {merge:true}).catch(()=>{});
+}
+
+function applyRemote(data){
+  if(data.tasks){
+    Object.assign(saved, data.tasks);
+    localStorage.setItem("tasks", JSON.stringify(saved));
+    document.querySelectorAll(".chk input[type=checkbox]").forEach(cb=>{
+      cb.checked = !!saved[cb.id];
+      cb.closest(".chk").classList.toggle("done", cb.checked);
+    });
+  }
+  if(data.inf){
+    Object.assign(INF, data.inf);
+    localStorage.setItem("inf", JSON.stringify(INF));
+    document.querySelectorAll("input.inf").forEach(inp=>{
+      if(document.activeElement !== inp) inp.value = INF[inp.dataset.k]||"";
+    });
+  }
+  if(data.exps){
+    EXPS = data.exps;
+    localStorage.setItem("exps", JSON.stringify(EXPS));
+    refreshExp();
+  }
+  if(data.rates){
+    Object.assign(RATES, data.rates);
+    localStorage.setItem("rates", JSON.stringify(RATES));
+    ["CHF","EUR"].forEach(c=>{
+      const inp = document.getElementById("rate-"+c);
+      if(inp && document.activeElement !== inp) inp.value = RATES[c];
+    });
+    refreshExp();
+  }
+}
+
+function startSync(){
+  const room = (localStorage.getItem("room")||DEFAULT_ROOM).trim();
+  if(typeof firebase === "undefined"){ setSyncStatus("⚠️ 載入唔到 Firebase(可能離線)— 有網絡時 refresh 一次"); return; }
+  try{
+    firebase.initializeApp(FBCONF);
+    db = firebase.firestore();
+    try{ db.enablePersistence({synchronizeTabs:true}); }catch(e){}
+    roomRef = db.collection("trips").doc(room);
+    attCol = roomRef.collection("atts");
+    // 初次加入:房未存在 → 上載本機資料;已存在 → 補返本機有、雲端冇嘅嘢
+    roomRef.get().then(s=>{
+      const p = {rates:RATES};
+      if(Object.keys(saved).length) p.tasks = saved;
+      if(Object.keys(INF).length) p.inf = INF;
+      const remote = s.exists ? s.data() : {};
+      if(EXPS.length && !(remote.exps && remote.exps.length)) p.exps = EXPS;
+      pushSync(p);
+      TASKS.forEach(t=>{
+        const img = localStorage.getItem("att-"+t.id);
+        if(img) attCol.doc(t.id).get().then(a=>{ if(!a.exists) attCol.doc(t.id).set({img}).catch(()=>{}); }).catch(()=>{});
+      });
+    }).catch(()=>{});
+    roomRef.onSnapshot(snap=>{
+      if(snap.exists) applyRemote(snap.data());
+      setSyncStatus(`☁️ 同步中 · 房號 <b>${escT(room)}</b>`);
+    }, err=>setSyncStatus("⚠️ 同步出錯:"+escT(err.code||err.message)));
+    attCol.onSnapshot(snap=>{
+      snap.docChanges().forEach(ch=>{
+        const tid = ch.doc.id;
+        if(ch.type === "removed"){ localStorage.removeItem("att-"+tid); }
+        else{
+          const img = ch.doc.data().img;
+          if(img){ try{ localStorage.setItem("att-"+tid, img); }catch(e){} }
+        }
+        drawThumb(tid);
+      });
+    }, ()=>{});
+  }catch(e){ setSyncStatus("⚠️ "+escT(e.message)); }
+}
+
+(function(){
+  const roomIn = $("#room-in"), roomBtn = $("#room-btn");
+  const custom = localStorage.getItem("room")||"";
+  roomIn.value = custom;
+  if(custom){ roomBtn.textContent = "用返預設"; roomIn.disabled = true; }
+  roomBtn.addEventListener("click", ()=>{
+    if(localStorage.getItem("room")){
+      if(confirm("轉返用內置預設房號?")){ localStorage.removeItem("room"); location.reload(); }
+      return;
+    }
+    const v = roomIn.value.trim();
+    if(v.length < 8){ alert("房號最少 8 個字"); return; }
+    if(/[\/\s#?]/.test(v)){ alert("房號唔可以有空格或者 / # ? 符號"); return; }
+    localStorage.setItem("room", v);
+    location.reload();
+  });
+  startSync();
 })();
 
 // offline support

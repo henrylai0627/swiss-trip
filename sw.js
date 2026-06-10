@@ -1,4 +1,4 @@
-const CACHE = "swisstrip-v2";
+const CACHE = "swisstrip-v6";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", e => {
@@ -15,7 +15,19 @@ self.addEventListener("activate", e => {
 
 // network-first for same-origin pages, fall back to cache when offline
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET" || !e.request.url.startsWith(self.location.origin)) return;
+  if (e.request.method !== "GET") return;
+  // firebase SDK: cache-first so the app still boots offline
+  if (e.request.url.startsWith("https://www.gstatic.com/firebasejs/")) {
+    e.respondWith(
+      caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+        return res;
+      }))
+    );
+    return;
+  }
+  if (!e.request.url.startsWith(self.location.origin)) return;
   e.respondWith(
     fetch(e.request)
       .then(res => {
