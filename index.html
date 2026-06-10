@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🇨🇭 Swiss + Milano 2026</title>
+<meta name="theme-color" content="#d52b1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SwissTrip">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23d52b1e'/><rect x='42' y='20' width='16' height='60' fill='white'/><rect x='20' y='42' width='60' height='16' fill='white'/></svg>">
+<style>
+:root{
+  --red:#d52b1e; --red-dark:#b02318;
+  --bg:#f4f5f7; --card:#ffffff; --text:#1c1c1e; --sub:#6b7280;
+  --line:#e5e7eb; --cam:#0ea5e9; --ticket:#f59e0b; --info:#8b5cf6;
+  --meal:#16a34a; --shadow:0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+body{margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif; background:var(--bg); color:var(--text); padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky; top:0; z-index:50; background:var(--red); color:#fff; padding-top:env(safe-area-inset-top); box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.htitle{display:flex; align-items:center; justify-content:space-between; padding:10px 14px 6px}
+.htitle h1{font-size:17px; margin:0; font-weight:700}
+.htitle .sub{font-size:11px; opacity:.85}
+#tabs{display:flex; overflow-x:auto; gap:6px; padding:4px 12px 10px; scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto; background:rgba(255,255,255,.16); color:#fff; border:none; border-radius:12px; padding:6px 10px; font-size:12px; line-height:1.25; text-align:center; cursor:pointer; min-width:52px}
+.tab b{display:block; font-size:14px}
+.tab.active{background:#fff; color:var(--red); font-weight:700}
+.tab.tasks-tab.active{color:#b45309}
+main{max-width:640px; margin:0 auto; padding:12px 12px 40px}
+.dayhead{padding:4px 4px 10px}
+.dayhead h2{margin:0; font-size:21px}
+.dayhead .route{color:var(--sub); font-size:14px; margin-top:3px}
+.badge{display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-top:6px}
+.badge.bday{background:#fde7f3; color:#db2777}
+.badge.flight{background:#e0f2fe; color:#0369a1}
+.card{background:var(--card); border-radius:16px; box-shadow:var(--shadow); padding:14px; margin-bottom:12px}
+.card h3{margin:0 0 10px; font-size:14px; color:var(--sub); text-transform:uppercase; letter-spacing:.4px; display:flex; align-items:center; gap:6px}
+.hotel{display:flex; gap:10px; align-items:center}
+.hotel .ic{font-size:22px}
+.hotel .nm{font-weight:700; font-size:15px}
+.hotel .loc{color:var(--sub); font-size:13px}
+.tl{position:relative; padding-left:2px}
+.ti{display:flex; gap:10px; padding:7px 0; border-bottom:1px solid var(--line); align-items:flex-start}
+.ti:last-child{border-bottom:none}
+.ti .t{flex:0 0 86px; font-weight:700; font-size:13px; color:var(--red-dark); font-variant-numeric:tabular-nums; padding-top:1px}
+.ti .x{flex:1; font-size:14px; line-height:1.45}
+.ti .x small{display:block; color:var(--sub); font-size:12px; margin-top:2px}
+a.mlink{text-decoration:none; font-size:12px; margin-left:4px; vertical-align:baseline; white-space:nowrap}
+.ti.hl .x{font-weight:600}
+.linkrow{display:flex; flex-wrap:wrap; gap:8px}
+a.btn{display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size:13px; font-weight:600; padding:9px 12px; border-radius:12px; color:#fff; line-height:1.2}
+a.btn.cam{background:var(--cam)}
+a.btn.ticket{background:var(--ticket)}
+a.btn.info{background:var(--info)}
+a.btn.map{background:#374151}
+.meals{display:grid; gap:8px}
+.meal{display:flex; gap:8px; font-size:14px; align-items:flex-start}
+.meal .k{flex:0 0 26px; font-size:16px}
+.meal .v b{display:block; font-size:12px; color:var(--meal); font-weight:700}
+.note{background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.5; margin-top:10px}
+.note b{color:#92400e}
+.cost li{font-size:13.5px; padding:3px 0}
+.cost ul{margin:0; padding-left:18px}
+.tips{font-size:13.5px; line-height:1.6; color:#374151}
+.tips p{margin:6px 0}
+ul.clean{margin:0; padding-left:18px; font-size:14px; line-height:1.7}
+.chk{display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:14px; line-height:1.45}
+.chk:last-child{border-bottom:none}
+.chk input{width:20px; height:20px; accent-color:var(--meal); flex:0 0 auto; margin-top:1px}
+.chk.done label{text-decoration:line-through; color:var(--sub)}
+.chk a{color:var(--cam)}
+.spot h4{margin:12px 0 4px; font-size:14.5px}
+.spot p{margin:0; font-size:13.5px; color:#374151; line-height:1.6}
+footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
+.section{display:none}
+.section.active{display:block}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#101114; --card:#1c1d22; --text:#f2f2f5; --sub:#9ca3af; --line:#2e2f36; --shadow:0 1px 3px rgba(0,0,0,.4)}
+  .note{background:#2a2310; border-color:#5b4a14}
+  .note b{color:#fbbf24}
+  .tips, .spot p{color:#c7cad1}
+  .badge.bday{background:#3f1d31}
+  .badge.flight{background:#12303f}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="htitle">
+    <h1>🇨🇭 Swiss + Milano 🇮🇹</h1>
+    <span class="sub">2026/6/25 – 7/5</span>
+  </div>
+  <div id="tabs"></div>
+</header>
+<main id="main"></main>
+<footer>BB &amp; Henry · Switzerland + Milano 2026 ❤️</footer>
+
+<script>
+const DAYS = [
+{
+  id:"d0625", date:"2026-06-25", chip:{w:"四",d:"25/6"}, title:"6月25日 (四) 出發日", route:"香港 → 機場", badge:{t:"✈️ 夜機",c:"flight"}, hotel:{ic:"✈️",nm:"On Plane",loc:"CX383 凌晨起飛"},
+  tl:[
+    {t:"19:30",x:"沖涼 + Dinner"},
+    {t:"21:00",x:"搭 A47X 去機場"},
+    {t:"22:00",x:"機場 Check in",hl:1},
+  ],
+  meals:[],
+  costs:["瑞士 Half Fare Card $2,975.2/2人 (@$1,487.6)"],
+  tips:["✅ 記得帶定 Half Fare Card、護照、轉插、行山鞋!"],
+  links:[]
+},
+{
+  id:"d0626", date:"2026-06-26", chip:{w:"五",d:"26/6"}, title:"6月26日 (五) 抵達瑞士", route:"HKG → 蘇黎世 ZRH → 因特拉肯 Interlaken → 格林德瓦", badge:{t:"✈️ CX383 00:25 起飛",c:"flight"},
+  hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald (今晚起住3晚)"},
+  tl:[
+    {t:"00:25",x:"HKG 起飛 (CX383,13hr 5m)",s:"Breakfast 喺機上食"},
+    {t:"07:30",x:"到達 ZRH 蘇黎世機場",hl:1},
+    {t:"08:45",x:"離開 ZRH 搭火車前往 Interlaken"},
+    {t:"11:00",x:"抵達 Interlaken Ost,寄放行李 + 買 Lunch @Coop",s:"月台旁有成排置物櫃,準備定 CHF 硬幣(部分接受信用卡)"},
+    {t:"11:30",x:"抵達哈德昆纜車站 (Harderbahn)"},
+    {t:"11:40-12:40",x:"哈德昆觀景台 Harder Kulm + Lunch",s:"纜車10分鐘,每30分鐘一班 · 來回 CHF 22",hl:1},
+    {t:"13:00-13:45",x:"阿爾卑斯野生動物園 (Alpine Wildlife Park)"},
+    {t:"14:00-15:45",x:"Höhematte Park (chill) + Höheweg 主街散步 + Casino Interlaken 打卡"},
+    {t:"16:07-16:51",x:"Interlaken Ost 坐船去 Iseltwald",s:"船飛要提前買 · CHF 10.5",hl:1},
+    {t:"17:00-17:45",x:"漫步布里恩茨湖 Lake Brienz"},
+    {t:"17:57-18:11",x:"Bus 103 返 Interlaken Ost (CHF 3.2)"},
+    {t:"19:00前",x:"Coop 超市補給",s:"*買明天早餐+午餐"},
+    {t:"19:34-20:03",x:"火車前往 Grindelwald (35mins)"},
+    {t:"20:15",x:"Hotel Check in 🏨",hl:1},
+  ],
+  meals:[
+    {k:"🌅",b:"Breakfast",v:"飛機餐"},
+    {k:"☀️",b:"Lunch",v:"Coop 買,帶上 Harder Kulm 食"},
+    {k:"🌙",b:"Dinner",v:"Coop 烤雞(如果買到) + 杯麵"},
+    {k:"🛒",b:"記住",v:"買埋明天早+午餐"},
+  ],
+  costs:["機場→Interlaken 火車 $774.36/2人","Harder Kulm 纜車來回 CHF 22","Iseltwald 船 CHF 10.5","Bus 103 CHF 3.2","Interlaken→Grindelwald $109.96/2人"],
+  tips:["Interlaken Ost 月台旁邊有一整排置物櫃,適合去少女峰嘅遊客。建議準備好 CHF 硬幣,部分櫃接受信用卡。"],
+  links:[
+    {l:"📷 Harder Kulm Live Cam",u:"https://webcams.jungfrau.ch/interlaken-harderkulm/#/",c:"cam"},
+    {l:"🚠 Jungfrau 營運狀態",u:"https://www.jungfrau.ch/en-gb/live/operating-info/",c:"info"},
+    {l:"⛴️ 船 Timetable (PDF)",u:"https://www.bls-schiff.ch/sites/default/files/2026-05/timetable_bls_schifffahrt_2026.pdf",c:"info"},
+    {l:"🗺️ 行程參考 (Gemini)",u:"https://gemini.google.com/app/5588459a861d32b8",c:"info"},
+  ]
+},
+{
+  id:"d0627", date:"2026-06-27", chip:{w:"六",d:"27/6"}, title:"6月27日 (六) First 冒險日", route:"格林德瓦 Grindelwald · First", badge:{t:"🎂 BB 30th Birthday!",c:"bday"},
+  hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald"},
+  tl:[
+    {t:"07:30",x:"Wake up ⏰"},
+    {t:"08:30",x:"鎮中心步行去纜車站 (Firstbahn AG),乘纜車上 Schreckfeld"},
+    {t:"10:00",x:"玩 Mountain Cart 🛞 (Schreckfeld → Bort)",s:"之後搭返纜車上 First",hl:1},
+    {t:"11:00",x:"First Cliff Walk 懸崖步道",hl:1},
+    {t:"11:30",x:"健行至 Bachalpsee 高山湖泊 🏔",s:"往返約2小時 · 湖邊自備 Lunch"},
+    {t:"15:30",x:"First Trottibike 🛴 落山",hl:1},
+    {t:"17:00",x:"返回 Grindelwald 鎮上逛 + Playground + Terminal"},
+    {t:"18:30",x:"🎂 Birthday Dinner @ Onkel Tom's Hütte",s:"手工 Pizza 質素極高,溫馨小木屋感",hl:1},
+  ],
+  meals:[
+    {k:"🌅",b:"Breakfast",v:"Coop"},
+    {k:"☀️",b:"Lunch",v:"Coop 買,帶去 Bachalpsee 湖邊食"},
+    {k:"🎂",b:"BB Birthday Dinner",v:"Onkel Tom's Hütte 手工 Pizza"},
+    {k:"🛒",b:"記住",v:"買明天早+午+/-晚餐"},
+  ],
+  costs:["First 冒險活動套票 (Adventure Package) CHF 81/人 — 包 Mountain Cart (Schreckfeld→Bort)、First Trottibike (from Bort)、無限纜車"],
+  tips:[],
+  links:[
+    {l:"📷 First–Schreckfeld Live Cam",u:"https://webcams.jungfrau.ch/first-schreckfeld/#/",c:"cam"},
+    {l:"🟢 活動即時狀態",u:"https://adventure.jungfrau.ch/",c:"info"},
+    {l:"🎫 Adventure Package",u:"https://www.jungfrau.ch/en-gb/grindelwaldfirst/adventure-package/",c:"ticket"},
+  ]
+},
+{
+  id:"d0628", date:"2026-06-28", chip:{w:"日",d:"28/6"}, title:"6月28日 (日) 少女峰", route:"Jungfraujoch — Top of Europe 🏔",
+  hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald"},
+  tl:[
+    {t:"06:45",x:"Wake up ⏰"},
+    {t:"07:15",x:"搭巴士前往 Grindelwald Terminal (CHF 2.2)"},
+    {t:"07:45",x:"轉乘 Eiger Express 前往少女峰",s:"要提前 Book! CHF 59.8-60.9",hl:1},
+    {t:"08:40",x:"抵達 Top of Europe 🇨🇭",s:"獅身人面像觀景台 Sphinx Observatory · 冰宮 Alpine Sensation & Ice Palace · 瑞士國旗 Jungfraujoch Plateau",hl:1},
+    {t:"12:00",x:"Lunch (自備)"},
+    {t:"13:00",x:"搭到艾格冰川 Eigergletscher,健行至小夏戴克 Kleine Scheidegg",s:"之後再搭車返 Grindelwald Terminal (CHF 39.5 + CHF 21.8-22.9)"},
+    {t:"14:45",x:"Bus 122 去 Grindelwald 纜車站 (CHF 2.2)"},
+    {t:"15:00",x:"[如果好天 ☀️] Rodelbahn Pfingstegg 纜車上山 (5mins)",s:"纜車來回 CHF 16 · 滑梯 CHF 8/人 · Fly-Line CHF 14/人"},
+    {t:"18:00",x:"搭纜車落山休息"},
+  ],
+  meals:[
+    {k:"🌅",b:"Breakfast",v:"Coop"},
+    {k:"☀️",b:"Lunch",v:"Coop 買,帶去少女峰食"},
+    {k:"🌙",b:"Dinner",v:"Coop 烤雞(如果買到) + 杯麵"},
+    {k:"🛒",b:"記住",v:"買明天早+/-午餐(如果有開)"},
+  ],
+  costs:["巴士 CHF 2.2","Eiger Express CHF 59.8-60.9","落山段 CHF 39.5 + CHF 21.8-22.9","Bus 122 CHF 2.2","Pfingstegg 纜車來回 CHF 16","+/- Snow Fun Park Sledding & Tube CHF 20/人","+/- Pfingstegg 滑梯 CHF 8 · Fly-Line CHF 14"],
+  tips:["落山如果想欣賞唔同景色,可以搭傳統 Rack Railway 列車去 Kleine Scheidegg,再返 Grindelwald 同 Interlaken Ost~"],
+  links:[
+    {l:"📷 Jungfraujoch Live Cam",u:"https://webcams.jungfrau.ch/top-of-europe-jungfraujoch/#/",c:"cam"},
+    {l:"🎫 Book Eiger Express",u:"https://www.jungfrau.ch/en-gb/jungfraujoch-top-of-europe/buy-jungfraujoch-ticket/",c:"ticket"},
+    {l:"🥾 Eiger Walk 健行攻略",u:"https://twoslowbyron.com/jungfrau_eiger_walk/",c:"info"},
+    {l:"❄️ Snow Fun Park",u:"https://www.jungfrau.ch/en-gb/jungfraujoch-top-of-europe/snow-fun-park/",c:"info"},
+    {l:"🛷 Pfingstegg 纜車",u:"https://www.pfingstegg.ch/en/discover/cablecar",c:"info"},
+    {l:"📖 攻略: vivianexplore",u:"https://vivianexplore.tw/jungfraujoch/",c:"info"},
+    {l:"📖 攻略: leo-travel",u:"https://www.leo-travel.idv.tw/60595/swiss-interlaken-jungfraujoch-guide",c:"info"},
+  ]
+},
+{
+  id:"d0629", date:"2026-06-29", chip:{w:"一",d:"29/6"}, title:"6月29日 (一) 轉戰策馬特", route:"Grindelwald → 策馬特 Zermatt · Gornergrat 🚞",
+  hotel:{ic:"🏨",nm:"Hotel Sarazena",loc:"Zermatt"},
+  tl:[
+    {t:"08:30",x:"Wake up + Check out"},
+    {t:"09:17-12:17",x:"乘火車前往 Zermatt (經 Spiez/Visp 轉乘)",s:"$? 已包套票部分 · CHF 41.4",hl:1},
+    {t:"12:30",x:"抵達 Zermatt,去酒店寄存行李 + Lunch"},
+    {t:"14:00-14:33",x:"Gornergrat Bahn 登山火車上山 🚞",s:"觀看馬特洪峰最佳視角 · 買定飛 scan QR code · 上山坐右側!",hl:1},
+    {t:"",x:"Gornergrat 觀景台",s:"往觀景台上方走一點,可同時影到高納冰河 Gornergletscher 同葛倫茲冰河 Grenzgletscher 匯流"},
+    {t:"15:31-15:36",x:"Rotenboden 落車,步行5分鐘去 Riffelsee",s:"湖邊影馬特洪峰倒影 🏔💧",hl:1},
+    {t:"16:40",x:"從 Riffelsee 健行約20分鐘落山去 Riffelberg 纜車站正下方",s:"會見到一大群躲太陽嘅懶散黑面羊 🐑"},
+    {t:"17:46-18:05",x:"火車返 Zermatt"},
+    {t:"18:30",x:"Walk & Chill in Zermatt town",s:"班霍夫大道 Bahnhofstrasse · Pfarrkirche St. Mauritius 教堂 · 馬特洪峰觀景台 Matterhorn Viewpoint · 策馬特蘑菇屋"},
+    {t:"19:30",x:"Dinner"},
+  ],
+  meals:[
+    {k:"🌅",b:"Breakfast",v:"Coop"},
+    {k:"☀️",b:"Lunch",v:"Coop?"},
+    {k:"🌙",b:"Dinner",v:"Coop + 自備即食飯?"},
+  ],
+  costs:["火車去 Zermatt CHF 41.4","Gornergrat Bahn CHF 33","CHF 10.5","CHF 14.5"],
+  tips:["🚞 Gornergrat Bahn 買定飛 scan QR code。","💺 上山時坐火車 <b>右側</b>,係睇馬特洪峰最佳角度。","📸 到終點站後往觀景台上方行多步,可以同時影到兩條冰河匯流。"],
+  links:[
+    {l:"📷 Gornergrat Live Cam",u:"https://zermatt.roundshot.com/gornergrat/#/",c:"cam"},
+    {l:"📷 Zermatt 鎮 Live Cam",u:"https://zermatt.roundshot.com/zermatterhof/#/",c:"cam"},
+    {l:"🚌 Zermatt Shuttle Bus 時間表",u:"https://www.e-bus.ch/fahrplan.html",c:"info"},
+    {l:"🚞 Gornergrat Bahn 時間表 (PDF)",u:"https://assets.contenthub.dev/xshiytapvw9a/7f4d37989857e45c9ba3b358568aec63/FahrplanSommer-Herbst_20.04.-01.11.2026.pdf",c:"info"},
+    {l:"📖 攻略: bring-you Gornergrat",u:"https://www.bring-you.info/zh-tw/gornergrat",c:"info"},
+  ]
+},
+{
+  id:"d0630", date:"2026-06-30", chip:{w:"二",d:"30/6"}, title:"6月30日 (二) 五湖健行 → 意大利", route:"Zermatt 五湖 → Domodossola 🇮🇹",
+  hotel:{ic:"🏨",nm:"Hotel Ristorante Eurossola",loc:"Domodossola"},
+  tl:[
+    {t:"05:20-05:50",x:"露台睇日照金山 🌄",s:"日出 05:41",hl:1},
+    {t:"07:00?",x:"Wake up + Hotel breakfast"},
+    {t:"09:00",x:"Check out"},
+    {t:"09:00-09:25",x:"行去 Zermatt ZBAG-lz 站坐纜車"},
+    {t:"09:30-09:43",x:"搭到 Blauherd 纜車站 (五湖健行 CHF 29.5 Round)"},
+    {t:"",x:"步行20分鐘前往湖1 Stellisee 🏔💧",s:"馬特洪峰倒影名場面",hl:1},
+    {t:"10:40-10:47",x:"Blauherd 搭纜車回 Sunnegga",s:"到 Sunnegga 後可搭免費「電梯纜車」落湖5 Leisee(似搭𨋢咁上落),亦可以由旁邊路散步落去"},
+    {t:"~12:00",x:"Lunch @湖5 Leisee"},
+    {t:"13:30-15:00",x:"格納峽谷 Gorner Gorge (Gornerschlucht)",hl:1},
+    {t:"16:06 / 18:37",x:"火車 Zermatt → Domodossola 🇮🇹",s:"Dinner on train · 18:30 / 21:10 到 Domodossola",hl:1},
+    {t:"夜晚",x:"Piazza del Mercato (Citywalk + Dinner)"},
+  ],
+  meals:[
+    {k:"🌅",b:"Breakfast",v:"Hotel 早餐"},
+    {k:"☀️",b:"Lunch",v:"Coop 買,帶去湖5 Leisee 食"},
+    {k:"🌙",b:"Dinner",v:"@Domodossola"},
+  ],
+  costs:["五湖健行纜車 CHF 29.5 (Round)","Zermatt→Domodossola 火車 $574.05/2人","備選: 黑湖天堂 Schwarzsee Paradise CHF 30.5","備選: Matterhorn Glacier Paradise CHF 60"],
+  tips:[],
+  links:[
+    {l:"📷 Blauherd Live Cam",u:"https://zermatt.roundshot.com/blauherd/#/",c:"cam"},
+    {l:"📷 Sunnegga Live Cam",u:"https://zermatt.roundshot.com/sunnegga/#/",c:"cam"},
+    {l:"🎫 Matterhorn 纜車票",u:"https://www.matterhornparadise.ch/en/book/tickets",c:"ticket"},
+    {l:"📖 五湖健行攻略",u:"https://www.bring-you.info/zh-tw/5-seenweg-hiking",c:"info"},
+    {l:"📖 Gorner Gorge 攻略",u:"https://www.leo-travel.idv.tw/61209/swiss-zermatt-suspension-bridge-and-gorner-gorge",c:"info"},
+    {l:"📖 黑湖 Schwarzsee 攻略",u:"https://travistotravel.com/2025/07/07/swiss2012003/",c:"info"},
+    {l:"📖 Glacier Paradise 攻略",u:"https://www.bring-you.info/zh-tw/matterhorn-glacier-paradise",c:"info"},
+  ]
+},
+{
+  id:"d0701", date:"2026-07-01", chip:{w:"三",d:"1/7"}, title:"7月1日 (三) 米蘭", route:"Domodossola → Milano 🇮🇹",
+  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano (住3晚)"},
+  tl:[
+    {t:"08:56-10:30",x:"火車 Domodossola → Milano ($216.25/2人)",hl:1},
+    {t:"10:45",x:"擺行李去 Hotel",s:"*14:00 先可以 Check in"},
+    {t:"11:00",x:"Lunch: Spontini Pizza 🍕"},
+    {t:"12:00-12:30",x:"米蘭大教堂 The Duomo di Milano ⛪️",s:"€8 = $146.91/2人",hl:1},
+    {t:"下午",x:"Galleria Vittorio Emanuele II 拱廊街"},
+    {t:"",x:"Castello Sforzesco 斯福爾扎古堡"},
+    {t:"",x:"Parco Sempione 森皮奧內公園 + 和平之門"},
+    {t:"",x:"+/- Via Monte Napoleone 蒙特拿破崙大街"},
+    {t:"19:30",x:"Dinner @ Navigli 運河區 + 睇日落 🌇",s:"日落 21:15",hl:1},
+  ],
+  meals:[
+    {k:"☀️",b:"Lunch",v:"Spontini Pizza"},
+    {k:"🥪",b:"小食",v:"Panzerotti Luini 炸三文治 · Ciacco (Gelato) · La hora feliz"},
+    {k:"🌙",b:"Dinner",v:"OSTERIA DA FORTUNATA MILANO NAVIGLI (意粉)"},
+  ],
+  costs:["火車 $216.25/2人","Duomo €8 = $146.91/2人"],
+  tips:[],
+  links:[]
+},
+{
+  id:"d0702", date:"2026-07-02", chip:{w:"四",d:"2/7"}, title:"7月2日 (四) 威尼斯一日遊", route:"Milano ⇄ Venezia 🚤",
+  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano"},
+  tl:[
+    {t:"09:35-12:03",x:"火車去 Venezia S.Lucia ($595.21/2人 Round)",hl:1},
+    {t:"下午",x:"聖馬可廣場 Piazza San Marco"},
+    {t:"",x:"聖馬可大教堂"},
+    {t:"",x:"總督宮 Palazzo Ducale"},
+    {t:"",x:"嘆息橋 Ponte dei Sospiri"},
+    {t:"17:57-20:25",x:"@Venezia S.Lucia 火車返 Milano Centrale",hl:1},
+  ],
+  meals:[
+    {k:"🍝",b:"食咩好",v:"Del Moro's Fresh Pasta to Go · Pasta Go Espresso 義大利麵"},
+    {k:"🍰",b:"甜品",v:"VENEZIA Tre Mercanti 提拉米蘇 · Gelateria Gallonetto 義式冰淇淋"},
+  ],
+  costs:["火車來回 $595.21/2人"],
+  tips:["✅ 7月2日<b>唔使買票入城</b>!(Access fee 豁免日)"],
+  links:[
+    {l:"ℹ️ Venice Access Fee",u:"https://cda.veneziaunica.it/en/access-fee",c:"info"},
+  ]
+},
+{
+  id:"d0703", date:"2026-07-03", chip:{w:"五",d:"3/7"}, title:"7月3日 (五) 科莫湖", route:"Milano → Varenna ⇄ Bellagio 🛥",
+  hotel:{ic:"🏨",nm:"Hotel Bristol",loc:"Milano"},
+  tl:[
+    {t:"朝早",x:"火車 Milano → Varenna",s:"⚠️ 睇咗天氣好先買飛!前一日喺 Trenord 買",hl:1},
+    {t:"",x:"Varenna 乘渡輪前往 Bellagio",s:"直接買 Varenna–Bellagio Round Trip 船飛"},
+    {t:"",x:"Bellagio 遊覽",hl:1},
+    {t:"",x:"Punta Spartivento 分叉點"},
+    {t:"",x:"聖雅各伯聖殿 Basilica di San Giacomo"},
+    {t:"",x:"梅爾齊別墅花園 I Giardini di Villa Melzi",s:"要買 ticket €10 (可以即場買)"},
+    {t:"",x:"返 Varenna +/- 韋齊奧城堡 Castello di Vezio",s:"要 ticket"},
+  ],
+  meals:[],
+  costs:["Villa Melzi 花園 €10"],
+  tips:["⚠️ <b>睇咗天氣好先買飛~</b> 前一日先買 Milano→Varenna 火車票。"],
+  links:[
+    {l:"📷 Varenna 天氣 + Webcam",u:"https://www.meteoblue.com/en/weather/webcams/varenna_italy_3164701",c:"cam"},
+    {l:"🎫 Trenord 火車票",u:"https://www.trenord.it/",c:"ticket"},
+    {l:"🎫 渡輪 Navigazione Laghi",u:"https://www.navigazionelaghi.it/",c:"ticket"},
+  ]
+},
+{
+  id:"d0704", date:"2026-07-04", chip:{w:"六",d:"4/7"}, title:"7月4日 (六) 返屋企", route:"MXP → AUH → HKG", badge:{t:"✈️ EY82 + EY870",c:"flight"},
+  hotel:{ic:"✈️",nm:"On Plane",loc:"Etihad 經 Abu Dhabi"},
+  tl:[
+    {t:"07:30",x:"Final Breakfast + Check out"},
+    {t:"08:00",x:"搭車去機場 (Malpensa MXP)"},
+    {t:"08:30",x:"Airport check in",hl:1},
+    {t:"11:40",x:"MXP 起飛 ✈️ (EY 82, 6hr)",hl:1},
+    {t:"19:40",x:"到 AUH (Abu Dhabi)"},
+    {t:"21:10",x:"AUH 起飛 ✈️ (EY 870, 7hr 50min)",hl:1},
+  ],
+  meals:[],
+  costs:[],
+  tips:[],
+  links:[]
+},
+{
+  id:"d0705", date:"2026-07-05", chip:{w:"日",d:"5/7"}, title:"7月5日 (日) 到家", route:"HKG → Home 🏠",
+  hotel:{ic:"🏠",nm:"Home Sweet Home",loc:""},
+  tl:[
+    {t:"09:00",x:"到 HKG ✈️"},
+    {t:"10:30",x:"Home Sweet Home 🏠❤️",hl:1},
+  ],
+  meals:[],
+  costs:[],
+  tips:[],
+  links:[]
+},
+];
+
+const TASKS = [
+  {id:"t1", x:"Interlaken 坐船去 Iseltwald(提前買)", u:"https://www.bls-schiff.ch/sites/default/files/2026-05/timetable_bls_schifffahrt_2026.pdf", ul:"船 Timetable"},
+  {id:"t2", x:"Bus103 / 坐船前往 Interlaken Ost"},
+  {id:"t3", x:"纜車上 First 山頂 (Adventure Package)", u:"https://www.jungfrau.ch/en-gb/grindelwaldfirst/adventure-package/", ul:"買票"},
+  {id:"t4", x:"Eiger Express", u:"https://www.jungfrau.ch/en-gb/jungfraujoch-top-of-europe/buy-jungfraujoch-ticket/", ul:"買票"},
+  {id:"t5", x:"乘火車前往 Zermatt"},
+  {id:"t6", x:"Milan to Varenna(前一日先買)", u:"https://www.trenord.it/", ul:"trenord.it"},
+  {id:"t7", x:"梅爾齊別墅花園?(可以即場買)"},
+  {id:"t8", x:"Varenna to Bellagio 船飛", u:"https://www.navigazionelaghi.it/", ul:"navigazionelaghi.it"},
+];
+
+const BACKUP = [
+  {h:"＊蘇黎世 Zurich", p:"蘇黎世湖、利馬特河 · 萊茵瀑布 · 舊城區(奧古斯汀巷、蘇黎世大教堂、聖母大教堂、班霍夫大街、美術館、歌劇院) · 林登霍夫 · 聖彼得教堂 · 瑞士國立博物館 · Lindt 巧克力工廠 · FIFA Museum"},
+  {h:"琉森 Lucerne(蘇黎世出發最快41min)", p:"卡貝爾古橋 Kapellbrücke · 垂死獅子像 Löwendenkmal · 冰河公園 Gletschergarten(Swiss Travel Pass 免費) · 聖萊奧德伽爾教堂 · 琉森湖 · 穆塞格古城牆 · 天鵝廣場 · 近郊:鐵力士山+皮拉圖斯山"},
+  {h:"+/- 伯恩 Bern(首都,蘇黎世最快56min)", p:"拱廊商店街 Kramgasse · 噴泉巡禮 · 伯恩大教堂 · 阿勒河風景 · ?熊公園(10月底~3月冬眠) · ?玫瑰園 · 國會大廈(夜景)"},
+  {h:"＊因特拉肯 Interlaken(蘇黎世~2hrs)", p:"少女峰 · 徐尼格觀景台 Schynige Platte · 哈德昆景觀臺 Harder Kulm · 滑翔傘? · 布里恩茲湖 · 圖恩湖 · 聖貝亞圖斯洞穴 · 喀斯特洞穴 · 奧伯霍芬城堡 · 錫格里斯維爾全景橋 · 下森舊城區 Unterseen · 施皮茨 Spiez · 穆倫 Mürren · 勞特布魯嫩 Lauterbrunnen"},
+  {h:"格林德瓦 Grindelwald", p:"Eiger Express 登頂少女峰 · 菲斯特 First(4項冒險活動) · 艾格峰、僧侶峰、少女峰 · 普芬斯蒂格 Pfingstegg(Toboggan Run) · 格林德瓦大街"},
+  {h:"策馬特 Zermatt", p:"馬特洪峰 Matterhorn · Gornergrat 觀景台 · 班霍夫大街 · 策馬特蘑菇屋"},
+];
+
+const $ = s => document.querySelector(s);
+const tabsEl = $("#tabs"), mainEl = $("#main");
+
+function esc(s){return s||""}
+
+function renderDay(d){
+  let h = `<section class="section" id="${d.id}">`;
+  h += `<div class="dayhead"><h2>${d.title}</h2><div class="route">${d.route}</div>`;
+  if(d.badge) h += `<span class="badge ${d.badge.c}">${d.badge.t}</span>`;
+  h += `</div>`;
+  if(d.hotel) h += `<div class="card"><div class="hotel"><div class="ic">${d.hotel.ic}</div><div><div class="nm">${d.hotel.nm}</div><div class="loc">${d.hotel.loc}</div></div></div></div>`;
+  if(d.links && d.links.length){
+    h += `<div class="card"><h3>🔗 快速連結 (Live Cam / 訂票)</h3><div class="linkrow">`;
+    d.links.forEach(L=>{ h += `<a class="btn ${L.c}" href="${L.u}" target="_blank" rel="noopener">${L.l}</a>`; });
+    h += `</div></div>`;
+  }
+  if(d.tl && d.tl.length){
+    h += `<div class="card"><h3>🕐 行程時間表</h3><div class="tl">`;
+    d.tl.forEach(i=>{
+      h += `<div class="ti${i.hl?" hl":""}"><div class="t">${esc(i.t)}</div><div class="x">${i.x}${i.s?`<small>${i.s}</small>`:""}</div></div>`;
+    });
+    h += `</div></div>`;
+  }
+  if(d.meals && d.meals.length){
+    h += `<div class="card"><h3>🍽 餐飲安排</h3><div class="meals">`;
+    d.meals.forEach(m=>{ h += `<div class="meal"><div class="k">${m.k}</div><div class="v"><b>${m.b}</b>${m.v}</div></div>`; });
+    h += `</div></div>`;
+  }
+  if(d.costs && d.costs.length){
+    h += `<div class="card cost"><h3>💰 費用</h3><ul>`;
+    d.costs.forEach(c=>{ h += `<li>${c}</li>`; });
+    h += `</ul></div>`;
+  }
+  if(d.tips && d.tips.length){
+    h += `<div class="note"><b>📌 貼士</b><br>` + d.tips.join("<br>") + `</div>`;
+  }
+  h += `</section>`;
+  return h;
+}
+
+function renderTasks(){
+  let h = `<section class="section" id="tasks"><div class="dayhead"><h2>✅ 待辦清單</h2><div class="route">買飛 / 預訂 checklist(勾選會自動儲存)</div></div><div class="card">`;
+  TASKS.forEach(t=>{
+    const link = t.u ? ` <a href="${t.u}" target="_blank" rel="noopener">🔗 ${t.ul}</a>` : "";
+    h += `<div class="chk" data-id="${t.id}"><input type="checkbox" id="${t.id}"><label for="${t.id}">${t.x}${link}</label></div>`;
+  });
+  h += `</div>`;
+  h += `<div class="note"><b>💡 SBB App 買飛貼士</b><br>喺 SBB App 買火車票時,喺乘客設定 (Passenger) 入面將折扣選項剔選 <b>「Half-Fare travelcard 1/2」</b>,系統就會自動半價結算。</div>`;
+  h += `<div class="dayhead" style="margin-top:18px"><h2>📍 備用景點參考</h2></div><div class="card spot">`;
+  BACKUP.forEach(b=>{ h += `<h4>${b.h}</h4><p>${b.p}</p>`; });
+  h += `<p style="margin-top:12px"><a href="https://stellaclife.com/switzerland-travel-guide/" target="_blank" rel="noopener" style="color:var(--cam)">📖 瑞士自由行總攻略 (stellaclife)</a></p>`;
+  h += `</div></section>`;
+  return h;
+}
+
+// build
+let tabsHtml = "";
+DAYS.forEach(d=>{ tabsHtml += `<button class="tab" data-target="${d.id}"><span>${d.chip.w}</span><b>${d.chip.d}</b></button>`; });
+tabsHtml += `<button class="tab tasks-tab" data-target="tasks"><span>清單</span><b>✅</b></button>`;
+tabsEl.innerHTML = tabsHtml;
+mainEl.innerHTML = DAYS.map(renderDay).join("") + renderTasks();
+
+function show(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active", s.id===id));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.target===id));
+  const tab = document.querySelector(`.tab[data-target="${id}"]`);
+  if(tab) tab.scrollIntoView({inline:"center", behavior:"smooth", block:"nearest"});
+  window.scrollTo({top:0});
+  localStorage.setItem("lastDay", id);
+}
+tabsEl.addEventListener("click", e=>{
+  const b = e.target.closest(".tab"); if(b) show(b.dataset.target);
+});
+
+// checklist persistence
+const saved = JSON.parse(localStorage.getItem("tasks")||"{}");
+document.querySelectorAll(".chk input").forEach(cb=>{
+  cb.checked = !!saved[cb.id];
+  cb.closest(".chk").classList.toggle("done", cb.checked);
+  cb.addEventListener("change", ()=>{
+    saved[cb.id] = cb.checked;
+    localStorage.setItem("tasks", JSON.stringify(saved));
+    cb.closest(".chk").classList.toggle("done", cb.checked);
+  });
+});
+
+// default day: today if within trip, else first day / last viewed
+(function(){
+  const today = new Date().toISOString().slice(0,10);
+  const match = DAYS.find(d=>d.date===today);
+  if(match){ show(match.id); return; }
+  const last = localStorage.getItem("lastDay");
+  if(last && document.getElementById(last)){ show(last); return; }
+  show(DAYS[0].id);
+})();
+
+// offline support
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
