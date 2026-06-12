@@ -719,7 +719,7 @@ function renderExpenses(){
     <select id="exp-c">${cfg.curs.concat(["HKD"]).map(c=>`<option>${c}</option>`).join("")}</select>
     <button id="exp-add" class="addbtn">加</button></div>
     <div class="exp-form"><input id="exp-n" type="text" placeholder="買咗咩 (e.g. 食飯 / 車飛 / 手信)" style="flex:1; min-width:0"></div></div>`;
-  h += `<div class="card"><h3>📒 記錄</h3><div id="exp-list"></div></div>`;
+  h += `<div class="card"><h3>📒 記錄 <button class="ebtn h3add" id="exp-csv">📤 Export CSV</button></h3><div id="exp-list"></div></div>`;
   h += `<div class="card"><h3>📊 總計</h3><div id="exp-total"></div>
     <div class="exp-rates">匯率: ${cfg.curs.map(c=>`1 ${c} = <input id="rate-${c}" type="number" step="0.01" inputmode="decimal"> HKD`).join(" · ")}</div></div>`;
   h += `</section>`;
@@ -1175,6 +1175,20 @@ function bindExpenses(){
   $("#exp-list").addEventListener("click", e=>{
     const b = e.target.closest(".expdel");
     if(b && confirm("刪除呢筆?")){ EXPS.splice(+b.dataset.i, 1); lsSet("exps", EXPS); refreshExp(); pushSync({exps:EXPS}); }
+  });
+  $("#exp-csv").addEventListener("click", ()=>{
+    if(!EXPS.length){ alert("未有記錄,冇嘢好 export 住~"); return; }
+    const q = v => /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+    const toHKD = x => x.c==="HKD" ? (+x.a||0) : (+x.a||0)*(RATES[x.c]||0);
+    const rows = [["日期","貨幣","金額","項目","≈HKD"]];
+    EXPS.forEach(x=>{ rows.push([x.d||"", x.c, (+x.a).toFixed(2), x.n||"", toHKD(x) ? toHKD(x).toFixed(1) : ""]); });
+    rows.push(["","","","總計", EXPS.reduce((s,x)=>s+toHKD(x), 0).toFixed(1)]);
+    const csv = "\uFEFF" + rows.map(r=>r.map(v=>q(String(v))).join(",")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
+    a.download = ((curTrip && curTrip.name ? curTrip.name : "trip").replace(/[\\\/:*?"<>|]/g,"").trim() || "trip") + " 使費.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
   });
   curCfg().curs.forEach(c=>{
     const inp = $("#rate-"+c);
