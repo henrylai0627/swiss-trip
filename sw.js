@@ -1,4 +1,4 @@
-const CACHE = "swisstrip-v10";
+const CACHE = "swisstrip-v11";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", e => {
@@ -16,8 +16,8 @@ self.addEventListener("activate", e => {
 // network-first for same-origin pages, fall back to cache when offline
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
-  // firebase SDK: cache-first so the app still boots offline
-  if (e.request.url.startsWith("https://www.gstatic.com/firebasejs/")) {
+  // firebase SDK + leaflet: cache-first so the app still boots offline
+  if (e.request.url.startsWith("https://www.gstatic.com/firebasejs/") || e.request.url.startsWith("https://unpkg.com/leaflet@")) {
     e.respondWith(
       caches.match(e.request).then(r => r || fetch(e.request).then(res => {
         const copy = res.clone();

@@ -56,7 +56,21 @@ a.mlink{text-decoration:none; font-size:12px; margin-left:4px; vertical-align:ba
 @keyframes nowpulse{0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.35; transform:scale(.75)}}
 #nextbar{display:none; background:var(--red-dark); color:#fff; font-size:12.5px; padding:7px 14px 9px; cursor:pointer; line-height:1.35}
 #nextbar b{font-size:13.5px}
-.wx{font-size:12.5px; color:var(--sub); margin-top:4px}
+.wx{font-size:12.5px; color:var(--sub); margin-top:6px}
+.wxsum{display:flex; align-items:center; gap:9px; font-size:13.5px; color:var(--text)}
+.wxsum .bige{font-size:26px; line-height:1}
+.wxsum small{color:var(--sub)}
+.wxh{display:flex; gap:5px; overflow-x:auto; margin-top:7px; padding-bottom:2px; scrollbar-width:none}
+.wxh::-webkit-scrollbar{display:none}
+.wxchip{flex:0 0 auto; text-align:center; font-size:10.5px; color:var(--sub); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:5px 8px; line-height:1.5; box-shadow:var(--shadow)}
+.wxchip .e{font-size:15px; display:block}
+.wxchip b{display:block; font-size:12.5px; color:var(--text)}
+.wxchip .pp{color:#0ea5e9}
+#tripmap{height:64vh; border-radius:16px; box-shadow:var(--shadow); background:var(--card)}
+.emomark{font-size:25px; line-height:1; text-shadow:0 1px 3px rgba(0,0,0,.45); filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+.maplegend{display:flex; flex-wrap:wrap; gap:10px; font-size:12.5px; color:var(--sub); padding:8px 4px}
+.leaflet-popup-content{font-size:13px; line-height:1.5}
+.leaflet-popup-content a{color:var(--cam)}
 .att{display:flex; gap:6px; align-items:center; margin-top:7px}
 .att .ref{flex:1; min-width:0}
 input.inf, .exp-form input, .exp-form select{border:1px solid var(--line); border-radius:9px; padding:7px 9px; font-size:13px; background:var(--bg); color:var(--text); font-family:inherit}
@@ -173,6 +187,8 @@ footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
 <input type="file" id="attfile" accept="image/*" hidden>
 <input type="file" id="docfile" hidden>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
@@ -196,20 +212,21 @@ const BUILTIN_DAYS = [
   id:"d0626", date:"2026-06-26", tz:"Europe/Zurich", wx:{lat:46.686, lon:7.863, name:"Interlaken"}, chip:{w:"五",d:"26/6"}, title:"6月26日 (五) 抵達瑞士", route:"HKG → 蘇黎世 ZRH → 因特拉肯 Interlaken → 格林德瓦", badge:{t:"✈️ CX383 00:25 起飛",c:"flight"},
   hotel:{ic:"🏨",nm:"Hotel Bellevue Pinte",loc:"Grindelwald (今晚起住3晚)",m:"Hotel Bellevue-Pinte Grindelwald"},
   tl:[
-    {t:"00:25",x:"HKG 起飛 (CX383,13hr 5m)",s:"Breakfast 喺機上食"},
-    {t:"07:30",x:"到達 ZRH 蘇黎世機場",hl:1},
-    {t:"08:45",x:"離開 ZRH 搭火車前往 Interlaken"},
-    {t:"11:00",x:"抵達 Interlaken Ost,寄放行李 + 買 Lunch @Coop",s:"月台旁有成排置物櫃,準備定 CHF 硬幣(部分接受信用卡)",m:"Interlaken Ost Bahnhof"},
-    {t:"11:30",x:"抵達哈德昆纜車站 (Harderbahn)",m:"Harderbahn Interlaken"},
-    {t:"11:40-12:40",x:"哈德昆觀景台 Harder Kulm + Lunch",s:"纜車10分鐘,每30分鐘一班 · 來回 CHF 22",hl:1,m:"Harder Kulm"},
+    {t:"00:25",x:"HKG 起飛 ✈️ (CX383 · 13h 5m)",s:"Breakfast 喺機上食 · 落機前填好瑞士入境"},
+    {t:"07:30",x:"🛬 抵達 ZRH 蘇黎世機場",s:"入境 + 攞行李 + 落月台,預 1 個鐘",hl:1,m:"Zürich Flughafen"},
+    {t:"08:46",x:"🚆 ZRH 機場站 → Interlaken Ost <b>(直達,唔使轉車)</b>",s:"IC81 · Zürich Flughafen <b>4 號月台</b>上車 → Interlaken Ost <b>7 號月台</b>落<br>└ 車程 2h13 · 每小時一班 · 已包 Half Fare 半價<br>⏱ 後備:09:46 IC8(Bern 6 號月台轉 IC61,11:59 到)",hl:1,m:"Zürich Flughafen"},
+    {t:"10:59",x:"Interlaken Ost 落車,寄放行李 + 買 Lunch @Coop",s:"<b>7 號月台</b>落 · 月台旁有成排置物櫃,準備定 CHF 硬幣(部分接受信用卡)",m:"Interlaken Ost Bahnhof"},
+    {t:"11:15",x:"🚶 步行去哈德昆纜車站 Harderbahn",s:"由 Interlaken Ost 過河行約 10–12 分鐘",m:"Harderbahn Interlaken"},
+    {t:"11:40-12:40",x:"🚠 哈德昆觀景台 Harder Kulm + Lunch",s:"登山纜車 10 分鐘到頂 · 每 30 分鐘一班 · 來回 CHF 22",hl:1,m:"Harder Kulm"},
     {t:"13:00-13:45",x:"阿爾卑斯野生動物園 (Alpine Wildlife Park)",m:"Alpine Wildlife Park Interlaken"},
     {t:"14:00-15:45",x:"Höhematte Park (chill) + Höheweg 主街散步 + Casino Interlaken 打卡",m:"Höhematte Interlaken"},
-    {t:"16:07-16:51",x:"Interlaken Ost 坐船去 Iseltwald",s:"船飛要提前買 · CHF 10.5",hl:1,m:"Iseltwald"},
-    {t:"17:00-17:45",x:"漫步布里恩茨湖 Lake Brienz",m:"Lake Brienz"},
-    {t:"17:57-18:11",x:"Bus 103 返 Interlaken Ost (CHF 3.2)"},
-    {t:"19:00前",x:"Coop 超市補給",s:"*買明天早餐+午餐"},
-    {t:"19:34-20:03",x:"火車前往 Grindelwald (35mins)"},
-    {t:"20:15",x:"Hotel Check in 🏨",hl:1},
+    {t:"~15:50",x:"🚶 行去 Interlaken Ost 船碼頭",s:"碼頭就喺火車站旁邊湖邊 (Interlaken Ost, See)",m:"Interlaken Ost Schiffstation"},
+    {t:"16:07-16:51",x:"⛴️ 坐船去 Iseltwald(布里恩茨湖)",s:"BLS 遊船 · Interlaken Ost (See) 上船 → Iseltwald 落 · 約 44 分鐘 · 船飛 CHF 10.5,要提前買<br>⏱ 後備(巴士):16:35 EXB 103,9 分鐘到 Iseltwald, Mühle",hl:1,m:"Iseltwald"},
+    {t:"17:00-17:45",x:"漫步布里恩茨湖 + 《愛的迫降》拍攝點",m:"Iseltwald"},
+    {t:"17:58",x:"🚌 Bus 103 返 Interlaken Ost",s:"Iseltwald, Mühle 站上車 → Interlaken Ost Bahnhof <b>B 月台</b>落 · 13 分鐘 · CHF 3.2 · 18:11 到",m:"Iseltwald, Mühle"},
+    {t:"18:15-19:20",x:"🛒 Coop 超市補給 (Interlaken Ost 站內)",s:"*買埋明天早餐 + 午餐(山上冇得買)",m:"Coop Interlaken Ost"},
+    {t:"19:34",x:"🚆 火車 Interlaken Ost → Grindelwald",s:"BOB R 線 · Interlaken Ost <b>2B 月台</b>上車 → Grindelwald <b>2 號月台</b>落 · 36 分鐘 · 20:10 到<br>⏱ 後備:20:04 / 20:34 同樣 BOB R 線",hl:1,m:"Grindelwald Bahnhof"},
+    {t:"20:20",x:"🏨 Hotel Bellevue Pinte Check in",s:"由 Grindelwald 站步行去酒店約 5–8 分鐘",hl:1,m:"Hotel Bellevue-Pinte Grindelwald"},
   ],
   meals:[
     {k:"🌅",b:"Breakfast",v:"飛機餐"},
@@ -543,6 +560,98 @@ const TAIPEI_HOTELS = [
   {nm:"第一大飯店 First Hotel", loc:"松江南京站", dt:"9–11/10 · 2晚 · 15:00 in / 12:00 out", m:"First Hotel Taipei 第一大飯店"},
 ];
 
+// 地圖 wishlist:行程以外想去嘅餐廳 / 購物點(q = 搜尋字串,座標喺 GEO_BAKED)
+const TAIPEI_PLACES = [
+  {n:"美堤河濱公園", q:"美堤河濱公園", k:"spot", day:"9/10"},
+  {n:"雙溪濕地公園", q:"雙溪濕地公園 台北", k:"spot", day:"11/10"},
+  {n:"米匠 MI JIAN(Omakase 候選)", q:"米匠 華山 台北", k:"meal", day:"9/10"},
+  {n:"鮨文(Omakase 候選)", q:"鮨文 台北", k:"meal", day:"9/10"},
+  {n:"禾鮨(Omakase 候選)", q:"禾鮨 台北", k:"meal", day:"9/10"},
+  {n:"瞞著爹(Omakase 候選)", q:"瞞著爹 台北", k:"meal", day:"9/10"},
+  {n:"Bino(10/10 Dinner)", q:"Bino 台北", k:"meal", day:"10/10"},
+  {n:"無老鍋 台北中山店(火鍋備選)", q:"無老鍋 台北中山店", k:"meal", day:"10/10"},
+  {n:"青花驕麻辣鍋 中山北店(火鍋備選)", q:"青花驕 台北中山北店", k:"meal", day:"10/10"},
+  {n:"八條老宅麻辣鍋(火鍋備選)", q:"八條老宅麻辣鍋 台北", k:"meal"},
+  {n:"魚貫鐵板燒", q:"魚貫鐵板燒 台北", k:"meal"},
+  {n:"傷心酒店", q:"傷心酒店 台北", k:"meal"},
+  {n:"南機場夜市", q:"南機場夜市", k:"meal"},
+  {n:"玉如阿姨 中山門市", q:"玉如阿姨 赤峰街 台北", k:"shop"},
+  {n:"玉如阿姨 敦化門市", q:"玉如阿姨 敦化 台北", k:"shop"},
+  {n:"玉如阿姨 西門門市", q:"玉如阿姨 西門 台北", k:"shop"},
+  {n:"東區地下街", q:"東區地下街", k:"shop"},
+];
+
+// 已核實座標(key = pin/q 嘅搜尋字串;有呢度就唔使 online geocode)
+const GEO_BAKED = {
+  "First Hotel Taipei 第一大飯店":[25.0524,121.5303],
+  "大佳河濱公園":[25.0747,121.5390],
+  "美堤河濱公園":[25.0741,121.5619],
+  "台北東區商圈":[25.0416,121.5495],
+  "基隆廟口夜市":[25.1286,121.7429],
+  "赤峰街 台北":[25.0552,121.5196],
+  "迪化街 台北":[25.0570,121.5111],
+  "大稻埕碼頭":[25.0560,121.5074],
+  "寧夏夜市":[25.0562,121.5152],
+  "上引水產 台北":[25.0667,121.5369],
+  "雙溪濕地公園 台北":[25.0970,121.5117],
+  "士林官邸":[25.0927,121.5309],
+  "士林夜市":[25.0883,121.5251],
+  "南機場夜市":[25.0285,121.5060],
+  "東區地下街":[25.0415,121.5485],
+  // 瑞士 + 意大利
+  "Alpine Wildlife Park Interlaken":[46.6970,7.8631],
+  "Bachalpsee":[46.6696,8.0210],
+  "Bahnhofstrasse Zermatt":[46.0228,7.7475],
+  "Basilica di San Giacomo Bellagio":[45.9879,9.2620],
+  "Basilica di San Marco Venezia":[45.4345,12.3398],
+  "Bellagio Lake Como":[45.9853,9.2618],
+  "Blauherd Zermatt":[46.0169,7.7874],
+  "Castello di Vezio Varenna":[46.0108,9.2861],
+  "Castello Sforzesco Milano":[45.4703,9.1781],
+  "Duomo di Milano":[45.4642,9.1916],
+  "First Cliff Walk Grindelwald":[46.6595,8.0533],
+  "Firstbahn Grindelwald":[46.6526,8.0585],
+  "Galleria Vittorio Emanuele II Milano":[45.4656,9.1900],
+  "Giardini di Villa Melzi Bellagio":[45.9788,9.2576],
+  "Gornergrat":[45.9833,7.7846],
+  "Gornergrat Bahn Zermatt":[46.0235,7.7491],
+  "Gornerschlucht Zermatt":[46.0088,7.7391],
+  "Grindelwald Terminal":[46.6255,8.0171],
+  "Harder Kulm":[46.6997,7.8561],
+  "Harderbahn Interlaken":[46.6956,7.8628],
+  "Höhematte Interlaken":[46.6860,7.8573],
+  "Hotel Bellevue-Pinte Grindelwald":[46.6236,8.0395],
+  "Hotel Bristol Milano":[45.4846,9.2065],
+  "Hotel Eurossola Domodossola":[46.1148,8.2956],
+  "Hotel Sarazena Zermatt":[46.0240,7.7493],
+  "Imbarcadero Varenna":[46.0140,9.2829],
+  "Interlaken Ost Bahnhof":[46.6905,7.8704],
+  "Iseltwald":[46.7105,7.9635],
+  "Jungfraujoch":[46.5476,7.9790],
+  "Kleine Scheidegg":[46.5852,7.9613],
+  "Lake Brienz":[46.7230,7.9650],
+  "Leisee Zermatt":[46.0150,7.7727],
+  "Milano Malpensa Airport Terminal 1":[45.6286,8.7104],
+  "Navigli Milano":[45.4502,9.1709],
+  "Onkel Tom's Hütte Grindelwald":[46.6244,8.0433],
+  "Osteria da Fortunata Navigli Milano":[45.4518,9.1704],
+  "Palazzo Ducale Venezia":[45.4342,12.3406],
+  "Parco Sempione Milano":[45.4730,9.1770],
+  "Pfingsteggbahn Grindelwald":[46.6234,8.0464],
+  "Piazza Mercato Domodossola":[46.1160,8.2912],
+  "Piazza San Marco Venezia":[45.4343,12.3387],
+  "Ponte dei Sospiri Venezia":[45.4341,12.3409],
+  "Punta Spartivento Bellagio":[45.9913,9.2655],
+  "Riffelberg":[45.9929,7.7551],
+  "Riffelsee":[45.9834,7.7620],
+  "Spontini Milano Duomo":[45.4657,9.1911],
+  "Stellisee":[46.0134,7.8004],
+  "Sunnegga Funicular Zermatt":[46.0197,7.7616],
+  "Varenna-Esino railway station":[46.0151,9.2862],
+  "Venezia Santa Lucia":[45.4411,12.3210],
+  "Via Monte Napoleone Milano":[45.4699,9.1931],
+};
+
 const TAIPEI_BACKUP = [
   {h:"📍 台北景點參考", p:'<a href="https://www.welcometw.com/%E5%8F%B0%E5%8C%97%E6%99%AF%E9%BB%9E/" target="_blank" rel="noopener">好好玩台北景點懶人包</a> · <a href="https://www.travel.taipei/zh-tw/must-visit/attractions" target="_blank" rel="noopener">台北旅遊網必訪景點</a>'},
   {h:"基隆", p:'<a href="https://andyventure.com/taiwan-keelung-itinerary/" target="_blank" rel="noopener">基隆一日遊攻略 (andyventure)</a>'},
@@ -554,7 +663,7 @@ const TAIPEI_BACKUP = [
 // 每個旅程 = 一個 Firestore 房號;BUILTIN_* / TAIPEI_* 係內置 trip 第一次開嘅種子資料
 const DEFAULT_ROOM = "bbhenry-swiss26-kq84z";
 let curRoom = null, curTrip = null;
-let DAYS = [], TASKSDEF = [], FLIGHTS = [], HOTELS = [], BACKUP = [], FILES = [];
+let DAYS = [], TASKSDEF = [], FLIGHTS = [], HOTELS = [], BACKUP = [], FILES = [], PLACES = [];
 let saved = {}, INF = {}, EXPS = [], RATES = {};
 let editMode = false;
 
@@ -701,7 +810,7 @@ const BUILTIN_HOTELS = [
 // 內置 trip 嘅種子資料(房間第一次開先用)
 const SEEDS = {
   [DEFAULT_ROOM]: {days:BUILTIN_DAYS, tasks:BUILTIN_TASKS, flights:BUILTIN_FLIGHTS, hotels:BUILTIN_HOTELS, backup:BUILTIN_BACKUP},
-  [TAIPEI_ROOM]: {days:TAIPEI_DAYS, tasks:TAIPEI_TASKS, flights:TAIPEI_FLIGHTS, hotels:TAIPEI_HOTELS, backup:TAIPEI_BACKUP},
+  [TAIPEI_ROOM]: {days:TAIPEI_DAYS, tasks:TAIPEI_TASKS, flights:TAIPEI_FLIGHTS, hotels:TAIPEI_HOTELS, backup:TAIPEI_BACKUP, places:TAIPEI_PLACES},
 };
 
 // 每個 trip 使費用嘅貨幣(HKD 以外)+ 預設匯率(→HKD)
@@ -765,6 +874,7 @@ function rebuildTabs(){
   let tabsHtml = "";
   DAYS.forEach(d=>{ tabsHtml += `<button class="tab" data-target="${d.id}"><span>${d.chip.w}</span><b>${d.chip.d}</b></button>`; });
   tabsHtml += `<button class="tab tasks-tab" data-target="tasks"><span>清單</span><b>✅</b></button>`;
+  tabsHtml += `<button class="tab" data-target="map"><span>地圖</span><b>🗺</b></button>`;
   tabsHtml += `<button class="tab" data-target="exps"><span>使費</span><b>💰</b></button>`;
   tabsHtml += `<button class="tab" data-target="infos"><span>資料</span><b>ℹ️</b></button>`;
   tabsEl.innerHTML = tabsHtml;
@@ -772,8 +882,9 @@ function rebuildTabs(){
 
 // 全頁渲染(入 trip / edit mode 切換 / checklist・航班・酒店資料變動)
 function renderTrip(keep){
+  destroyMap();
   rebuildTabs();
-  mainEl.innerHTML = DAYS.map(renderDay).join("") + renderTasks() + renderExpenses() + renderInfo();
+  mainEl.innerHTML = DAYS.map(renderDay).join("") + renderTasks() + renderMapSec() + renderExpenses() + renderInfo();
   bindTripUI();
   let id = keep && currentId && document.getElementById(currentId) ? currentId : null;
   if(!id){ const match = DAYS.find(d=> nowIn(d.tz||"Europe/Zurich").date === d.date); if(match) id = match.id; }
@@ -817,6 +928,7 @@ function openTrip(t){
   FLIGHTS = lsGet("flights", null) || (seed ? cp(seed.flights) : []);
   HOTELS = lsGet("hotels", null) || (seed ? cp(seed.hotels) : []);
   BACKUP = lsGet("backup", null) || (seed ? cp(seed.backup) : []);
+  PLACES = (seed && seed.places) ? seed.places : [];
   FILES = [];
   document.getElementById("homepage").hidden = true;
   document.getElementById("tripview").hidden = false;
@@ -856,6 +968,7 @@ function show(id, keep){
   if(!keep) window.scrollTo({top:0});
   if(curRoom) lsSet("lastDay", id);
   currentId = id;
+  if(id === "map") setTimeout(initMap, 30);
   // auto-scroll to the "now" row if this day is live
   const nowRow = document.querySelector(`#${id} .ti.now`);
   if(nowRow && !keep) setTimeout(()=>nowRow.scrollIntoView({block:"center", behavior:"smooth"}), 150);
@@ -969,6 +1082,11 @@ $("#nextbar").addEventListener("click", ()=>{
 
 // ---- weather (Open-Meteo, free, no key; cached 3hr in localStorage) ----
 const WXEMO = c => c===0?"☀️" : c<=2?"🌤️" : c===3?"☁️" : c<=48?"🌫️" : c<=57?"🌦️" : c<=67?"🌧️" : c<=77?"🌨️" : c<=82?"🌧️" : c<=86?"🌨️" : "⛈️";
+const WXTXT = c => c===0?"天晴" : c<=2?"大致天晴" : c===3?"多雲" : c<=48?"有霧" : c<=57?"毛毛雨" : c<=67?"有雨" : c<=77?"落雪" : c<=82?"驟雨" : c<=86?"雪驟" : "雷暴";
+function daysUntil(ds){
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.round((new Date(ds+"T00:00:00") - t) / 86400000);
+}
 async function loadWeather(){
   const room = curRoom;
   if(!room) return;
@@ -977,21 +1095,118 @@ async function loadWeather(){
     if(!d.wx) continue;
     const el = document.getElementById("wx-"+d.id);
     if(!el) continue;
-    const ck = room+":wx-"+d.date;
+    const ck = room+":wx2-"+d.date;
     let cached = null;
     try{ cached = JSON.parse(localStorage.getItem(ck)||"null"); }catch(e){}
     if(cached) el.innerHTML = cached.h;
     if(cached && Date.now()-cached.t < 3*3600*1000) continue;
+    // 預報期以外(Open-Meteo 出 ~16日)→ 顯示倒數提示,唔使白行 API
+    const du = daysUntil(d.date);
+    if(du > 15){
+      el.innerHTML = `<div class="wxsum"><span class="bige">📅</span><div>${d.wx.name} 天氣預報<br><small>出發前 16 日內會自動出現(仲有 ${du} 日)</small></div></div>`;
+      continue;
+    }
     try{
-      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${d.wx.lat}&longitude=${d.wx.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&start_date=${d.date}&end_date=${d.date}`);
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${d.wx.lat}&longitude=${d.wx.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto&start_date=${d.date}&end_date=${d.date}`);
       const j = await r.json();
       if(!j.daily || j.daily.weather_code == null || j.daily.weather_code[0] == null) continue;
+      const code = j.daily.weather_code[0];
       const pp = j.daily.precipitation_probability_max ? j.daily.precipitation_probability_max[0] : null;
-      const h = `${WXEMO(j.daily.weather_code[0])} ${d.wx.name} ${Math.round(j.daily.temperature_2m_max[0])}° / ${Math.round(j.daily.temperature_2m_min[0])}°${pp!=null ? ` · ☔️ ${pp}%` : ""}`;
+      let h = `<div class="wxsum"><span class="bige">${WXEMO(code)}</span><div><b>${d.wx.name} ${Math.round(j.daily.temperature_2m_max[0])}° / ${Math.round(j.daily.temperature_2m_min[0])}°</b>${pp!=null ? ` · ☔️ ${pp}%` : ""}<br><small>${WXTXT(code)}</small></div></div>`;
+      if(j.hourly && j.hourly.time && j.hourly.temperature_2m){
+        let chips = "";
+        [8,10,12,14,16,18,20,22].forEach(hr=>{
+          const i = j.hourly.time.findIndex(t=>t.endsWith(`T${String(hr).padStart(2,"0")}:00`));
+          if(i < 0 || j.hourly.temperature_2m[i] == null) return;
+          const hp = j.hourly.precipitation_probability ? j.hourly.precipitation_probability[i] : null;
+          chips += `<div class="wxchip">${String(hr).padStart(2,"0")}:00<span class="e">${WXEMO(j.hourly.weather_code[i])}</span><b>${Math.round(j.hourly.temperature_2m[i])}°</b>${hp!=null && hp>=20 ? `<span class="pp">☔️${hp}%</span>` : ""}</div>`;
+        });
+        if(chips) h += `<div class="wxh">${chips}</div>`;
+      }
       el.innerHTML = h;
       try{ localStorage.setItem(ck, JSON.stringify({t:Date.now(), h})); }catch(e){}
-    }catch(e){ /* offline / 太早未有預報 → 唔顯示 */ }
+    }catch(e){ /* offline → 唔顯示 / keep 舊 cache */ }
   }
+}
+
+// ---- 全程地圖 (Leaflet + OpenStreetMap;座標用 GEO_BAKED,冇嘅就 Nominatim geocode + cache) ----
+let lmap = null;
+function destroyMap(){ if(lmap){ try{ lmap.remove(); }catch(e){} lmap = null; } }
+const KEMO = {hotel:"🏨", spot:"📍", meal:"🍜", shop:"🛍️"};
+
+function renderMapSec(){
+  return `<section class="section" id="map"><div class="dayhead"><h2>🗺 全程地圖</h2><div class="route">所有景點 / 餐廳 / 購物點一眼睇晒 — 撳 pin 開 Google Maps</div></div>
+    <div id="tripmap"></div>
+    <div class="maplegend"><span>🏨 酒店</span><span>📍 景點</span><span>🍜 食</span><span>🛍️ 買</span></div>
+    <div id="map-status" style="font-size:12.5px; color:var(--sub); padding:0 4px 8px"></div></section>`;
+}
+
+function collectPins(){
+  const out = [], seen = {};
+  const add = (n,q,k,day)=>{
+    if(!q || seen[q]) return;
+    seen[q] = 1;
+    out.push({n:String(n).replace(/<[^>]*>/g,""), q, k, day:day||""});
+  };
+  DAYS.forEach(d=>{
+    const dl = d.chip ? d.chip.d : "";
+    if(d.hotel && d.hotel.m) add(d.hotel.nm, d.hotel.m, "hotel", dl);
+    (d.tl||[]).forEach(i=>add(i.x, i.m, "spot", dl));
+    (d.meals||[]).forEach(m2=>add(m2.v||m2.b, m2.m, "meal", dl));
+  });
+  (PLACES||[]).forEach(p=>add(p.n, p.q||p.n, p.k||"spot", p.day));
+  return out;
+}
+
+async function geocode(q){
+  if(GEO_BAKED[q]) return GEO_BAKED[q];
+  let c = null;
+  try{ c = JSON.parse(localStorage.getItem("geo:"+q)||"null"); }catch(e){}
+  if(c === "x") return null;        // 之前搵過冇結果
+  if(Array.isArray(c)) return c;
+  try{
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`);
+    const j = await r.json();
+    await new Promise(res=>setTimeout(res, 1100)); // Nominatim 限 1 req/s
+    if(j && j[0]){
+      const ll = [+j[0].lat, +j[0].lon];
+      try{ localStorage.setItem("geo:"+q, JSON.stringify(ll)); }catch(e){}
+      return ll;
+    }
+    try{ localStorage.setItem("geo:"+q, '"x"'); }catch(e){}
+  }catch(e){ /* offline → 下次再試 */ }
+  return null;
+}
+
+async function initMap(){
+  const st = $("#map-status");
+  if(!window.L){ if(st) st.textContent = "⚠️ 載入唔到地圖 library — 有網絡時 refresh 一次"; return; }
+  if(lmap){ lmap.invalidateSize(); return; }
+  const room = curRoom;
+  lmap = L.map("tripmap");
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:19, attribution:"© OpenStreetMap"}).addTo(lmap);
+  L.control.scale({imperial:false}).addTo(lmap);
+  const pins = collectPins();
+  if(!pins.length){
+    lmap.setView([25.05, 121.53], 11);
+    if(st) st.textContent = "未有地點 — 行程項目有 📍(Google Maps 搜尋字串)就會自動出現喺地圖";
+    return;
+  }
+  const pts = [];
+  let miss = 0;
+  for(let i = 0; i < pins.length; i++){
+    const p = pins[i];
+    if(st && i % 3 === 0) st.textContent = `📍 搵緊位置… ${i+1}/${pins.length}`;
+    const ll = await geocode(p.q);
+    if(curRoom !== room || !lmap) return; // 中途轉咗 trip
+    if(!ll){ miss++; continue; }
+    L.marker(ll, {icon: L.divIcon({className:"", html:`<div class="emomark">${KEMO[p.k]||"📍"}</div>`, iconSize:[26,26], iconAnchor:[13,22]})})
+      .addTo(lmap)
+      .bindPopup(`<b>${escT(p.n)}</b>${p.day ? ` <small style="color:#6b7280">(${escT(p.day)})</small>` : ""}<br><a href="${gm(p.q)}" target="_blank" rel="noopener">喺 Google Maps 開 ↗</a>`);
+    pts.push(ll);
+    lmap.fitBounds(pts, {padding:[36,36], maxZoom:15});
+  }
+  if(st) st.textContent = `📍 ${pts.length} 個地點` + (miss ? ` · ${miss} 個搵唔到座標(行程入面嘅 📍 連結照用得)` : "");
 }
 
 // ---- editable info fields (資料頁 + 清單 booking ref) ----
@@ -1208,14 +1423,14 @@ function bindExpenses(){
 (function(){
   let tx = 0, ty = 0, ok = false;
   document.addEventListener("touchstart", e=>{
-    ok = !e.target.closest("input, select, textarea, #tabs, #qrmodal, #editsheet");
+    ok = !e.target.closest("input, select, textarea, #tabs, #qrmodal, #editsheet, #tripmap");
     tx = e.touches[0].clientX; ty = e.touches[0].clientY;
   }, {passive:true});
   document.addEventListener("touchend", e=>{
     if(!ok || !curRoom) return;
     const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
     if(Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy)*1.7) return;
-    const order = DAYS.map(d=>d.id).concat(["tasks","exps","infos"]);
+    const order = DAYS.map(d=>d.id).concat(["tasks","map","exps","infos"]);
     const i = order.indexOf(currentId);
     const j = i + (dx < 0 ? 1 : -1);
     if(i >= 0 && j >= 0 && j < order.length) show(order[j]);
@@ -1804,7 +2019,7 @@ function importTripJSON(txt){
   const days = j.days.map((d, idx)=>{
     const date = /^\d{4}-\d{2}-\d{2}$/.test(d.date) ? d.date : null;
     let id = date ? "d"+date.slice(5).replace("-","") : "dx"+(idx+1);
-    while(usedIds[id] || ["tasks","exps","infos"].includes(id)) id += "x";
+    while(usedIds[id] || ["tasks","map","exps","infos"].includes(id)) id += "x";
     usedIds[id] = 1;
     const nd = {
       id,
