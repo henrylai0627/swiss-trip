@@ -1,4 +1,4 @@
-const CACHE = "swisstrip-v11";
+﻿const CACHE = "swisstrip-v12";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", e => {
