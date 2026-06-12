@@ -1,7 +1,7 @@
 {
-  "name": "Swiss + Milano 2026",
-  "short_name": "SwissTrip",
-  "description": "2026 Switzerland + Milano 旅行行程",
+  "name": "BB & BBQ Trips",
+  "short_name": "Trips",
+  "description": "BB & BBQ 嘅旅行行程",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#d52b1e",
