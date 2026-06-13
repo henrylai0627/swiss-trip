@@ -30,7 +30,7 @@ header{position:sticky; top:0; z-index:50; background:var(--red); color:#fff; pa
 .tab b{display:block; font-size:14px}
 .tab.active{background:#fff; color:var(--red); font-weight:700}
 .tab.tasks-tab.active{color:#b45309}
-main{max-width:640px; margin:0 auto; padding:12px 12px 40px}
+main{max-width:640px; margin:0 auto; padding:12px 12px calc(78px + env(safe-area-inset-bottom))}
 .dayhead{padding:4px 4px 10px}
 .dayhead h2{margin:0; font-size:21px}
 .dayhead .route{color:var(--sub); font-size:14px; margin-top:3px}
@@ -118,6 +118,12 @@ ul.clean{margin:0; padding-left:18px; font-size:14px; line-height:1.7}
 footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
 .section{display:none}
 .section.active{display:block}
+/* ---- bottom nav (mobile 主分類) ---- */
+#botnav{position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; max-width:640px; margin:0 auto; background:var(--card); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+#botnav button{flex:1; background:none; border:none; color:var(--sub); font-size:10.5px; padding:7px 2px 6px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; line-height:1.1; -webkit-tap-highlight-color:transparent}
+#botnav button .bi{font-size:21px; line-height:1; transition:transform .12s}
+#botnav button.active{color:var(--red); font-weight:700}
+#botnav button.active .bi{transform:translateY(-1px) scale(1.08)}
 /* ---- edit mode ---- */
 #editmode-btn{background:rgba(255,255,255,.16); border:none; color:#fff; border-radius:10px; font-size:14px; padding:5px 10px; cursor:pointer; margin-left:8px}
 #editmode-btn.on{background:#fff}
@@ -181,6 +187,7 @@ footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
   </header>
   <main id="main"></main>
   <footer>BB &amp; BBQ ❤️</footer>
+  <nav id="botnav"></nav>
 </div>
 <div id="qrmodal"><img alt="ticket"></div>
 <div id="editsheet"><div class="sheet"></div></div>
@@ -746,7 +753,8 @@ const BUILTIN_BACKUP = [
 ];
 
 const $ = s => document.querySelector(s);
-const tabsEl = $("#tabs"), mainEl = $("#main");
+const tabsEl = $("#tabs"), mainEl = $("#main"), botnavEl = $("#botnav");
+let lastDayId = null;
 
 function esc(s){return s||""}
 
@@ -888,14 +896,17 @@ function renderInfo(){
 }
 
 // build
+const BOTNAV = [
+  {cat:"itinerary", e:"🗓", t:"行程"},
+  {cat:"map",   e:"🗺", t:"地圖"},
+  {cat:"tasks", e:"✅", t:"清單"},
+  {cat:"exps",  e:"💰", t:"使費"},
+  {cat:"infos", e:"ℹ️", t:"資料"},
+];
 function rebuildTabs(){
-  let tabsHtml = "";
-  DAYS.forEach(d=>{ tabsHtml += `<button class="tab" data-target="${d.id}"><span>${d.chip.w}</span><b>${d.chip.d}</b></button>`; });
-  tabsHtml += `<button class="tab tasks-tab" data-target="tasks"><span>清單</span><b>✅</b></button>`;
-  tabsHtml += `<button class="tab" data-target="map"><span>地圖</span><b>🗺</b></button>`;
-  tabsHtml += `<button class="tab" data-target="exps"><span>使費</span><b>💰</b></button>`;
-  tabsHtml += `<button class="tab" data-target="infos"><span>資料</span><b>ℹ️</b></button>`;
-  tabsEl.innerHTML = tabsHtml;
+  // 頂部只留日子(主分類去咗底部 bottom nav)
+  tabsEl.innerHTML = DAYS.map(d=>`<button class="tab" data-target="${d.id}"><span>${d.chip.w}</span><b>${d.chip.d}</b></button>`).join("");
+  botnavEl.innerHTML = BOTNAV.map(n=>`<button data-cat="${n.cat}"><span class="bi">${n.e}</span><span>${n.t}</span></button>`).join("");
 }
 
 // 全頁渲染(入 trip / edit mode 切換 / checklist・航班・酒店資料變動)
@@ -980,9 +991,17 @@ function rebuildDays(){
 let currentId = null;
 function show(id, keep){
   document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active", s.id===id));
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.target===id));
-  const tab = document.querySelector(`.tab[data-target="${id}"]`);
-  if(tab && !keep) tab.scrollIntoView({inline:"center", behavior:"smooth", block:"nearest"});
+  const isDay = DAYS.some(d=>d.id===id);
+  // 頂部日子 strip 淨係喺「行程」分類先出現
+  tabsEl.style.display = isDay ? "" : "none";
+  if(isDay){
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.target===id));
+    const tab = document.querySelector(`.tab[data-target="${id}"]`);
+    if(tab && !keep) tab.scrollIntoView({inline:"center", behavior:"smooth", block:"nearest"});
+    lastDayId = id;
+  }
+  const cat = isDay ? "itinerary" : id;
+  botnavEl.querySelectorAll("button").forEach(b=>b.classList.toggle("active", b.dataset.cat===cat));
   if(!keep) window.scrollTo({top:0});
   if(curRoom) lsSet("lastDay", id);
   currentId = id;
@@ -993,6 +1012,14 @@ function show(id, keep){
 }
 tabsEl.addEventListener("click", e=>{
   const b = e.target.closest(".tab"); if(b) show(b.dataset.target);
+});
+botnavEl.addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.cat === "itinerary"){
+    let d = (lastDayId && document.getElementById(lastDayId)) ? lastDayId : null;
+    if(!d){ const m = DAYS.find(x=> nowIn(x.tz||"Europe/Zurich").date === x.date); d = m ? m.id : (DAYS[0] && DAYS[0].id); }
+    if(d) show(d);
+  } else show(b.dataset.cat);
 });
 
 // checklist persistence(每次 renderTrip 後重新 bind,元素係新嘅)
