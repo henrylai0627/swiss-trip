@@ -953,8 +953,9 @@ function bindDocSync(){
       const headers = {"content-type":"application/json"};
       if(DOC_SYNC.token) headers["x-sync-token"] = DOC_SYNC.token;
       const r = await fetch(DOC_SYNC.url, {method:"POST", headers});
-      const j = await r.json();
-      if(!r.ok) throw new Error(j.error || ("HTTP "+r.status));
+      const raw = await r.text();
+      let j; try{ j = JSON.parse(raw); }catch(_){ throw new Error("server 回咗非 JSON (HTTP "+r.status+"): "+raw.slice(0,120)); }
+      if(!r.ok) throw new Error(j.error ? (j.error + (j.step?` @${j.step}`:"")) : ("HTTP "+r.status));
       const tag = j.status==="updated" ? "✅ " : (j.status==="nochange" ? "👍 " : "ℹ️ ");
       st.textContent = tag + (j.message||"完成") + (j.changedDays && j.changedDays.length ? ` (${j.changedDays.join(", ")})` : "");
     }catch(e){ st.textContent = "❌ "+e.message; }

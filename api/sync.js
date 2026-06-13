@@ -63,16 +63,63 @@ async function fetchDoc() {
   return (await r.text()).replace(/\r\n/g, "\n").trim();
 }
 
+// 精簡每日資料畀 Gemini —— 唔送 tl(交通細節 + HTML),避免 round-trip 整爆 JSON
+function slimDays(days) {
+  return days.map((d) => ({
+    id: d.id,
+    date: d.date,
+    title: d.title,
+    route: d.route,
+    hotel: d.hotel ? { nm: d.hotel.nm, loc: d.hotel.loc } : null,
+    costs: d.costs || [],
+    meals: (d.meals || []).map((m) => ({ b: m.b, v: m.v })),
+    tips: d.tips || [],
+  }));
+}
+
+function mealEmoji(b) {
+  const s = String(b || "").toLowerCase();
+  if (s.includes("break") || s.includes("早")) return "🌅";
+  if (s.includes("lunch") || s.includes("午")) return "☀️";
+  if (s.includes("din") || s.includes("晚")) return "🌙";
+  if (s.includes("買") || s.includes("記")) return "🛒";
+  return "🍽️";
+}
+
+// 將 Gemini 嘅 patch 套落真正 day,只改有畀嘅欄位,tl/s/m/hl 原封不動
+function applyPatch(cur, p) {
+  const next = { ...cur };
+  if (typeof p.title === "string" && p.title.trim()) next.title = p.title;
+  if (typeof p.route === "string" && p.route.trim()) next.route = p.route;
+  if (p.hotel && typeof p.hotel === "object") {
+    next.hotel = { ...(cur.hotel || {}) };
+    if (typeof p.hotel.nm === "string") next.hotel.nm = p.hotel.nm;
+    if (typeof p.hotel.loc === "string") next.hotel.loc = p.hotel.loc;
+  }
+  if (Array.isArray(p.costs)) next.costs = p.costs.map(String);
+  if (Array.isArray(p.tips)) next.tips = p.tips.map(String);
+  if (Array.isArray(p.meals)) {
+    const old = cur.meals || [];
+    next.meals = p.meals
+      .filter((m) => m && m.b)
+      .map((m) => {
+        const prev = old.find((o) => o.b === m.b);
+        return { k: (prev && prev.k) || mealEmoji(m.b), b: String(m.b), v: String(m.v || "") };
+      });
+  }
+  return next;
+}
+
 async function geminiMerge(baselineDoc, newDoc, days) {
   const sys =
-    "你係旅遊行程同步助手。會收到:BB 改前(baseline)同改後(new)嘅 Google Doc 純文字、同埋現有詳細 days 資料(JSON array)。\n" +
-    "任務:搵出 new Doc 相對 baseline 改咗邊日邊樣嘢,將改動套落現有 days。\n" +
-    "Doc 欄位對照:Date→date/title、Venue→route、Hotel→hotel、Travel Fee→costs、Time→tl(逐個 {t,x})、Meal→meals、Entertainment/Remark→links/tips。\n" +
-    "鐵則:絕對保留每個 timeline item 已有嘅 s(交通細節)、m(地圖 pin)、hl,除非嗰個活動本身被刪/換。唔好為咗格式去重寫冇改過嘅嘢。\n" +
-    "只回傳有改動嘅 day(完整 day object,schema 同輸入一樣)。\n" +
-    '淨係輸出 JSON,格式:{"summary":"<中文一句講改咗乜,或「冇改動」>","changedDays":[<day object>...]}。冇改動時 changedDays 係空 array。';
+    "你係旅遊行程同步助手。會收到 BB 改前(baseline)同改後(new)嘅 Google Doc 純文字、同現有行程嘅精簡資料(slim days JSON,每日有 id)。\n" +
+    "任務:對比 new Doc 同 baseline,搵出改咗邊日邊樣嘢,只回傳要更新嘅欄位 patch。\n" +
+    "Doc 欄位對照:Date→title、Venue→route、Hotel→hotel{nm,loc}、Travel Fee→costs(string array)、Meal→meals(array of {b,v},b=餐種如Breakfast/Lunch/Dinner、v=內容)、Entertainment+Remark→tips(string array)。\n" +
+    "用 id 對應日子(根據 date / title 配對 Doc 嗰一行)。\n" +
+    "鐵則:① 只輸出真係改咗嘅欄位,冇改嘅欄位完全唔好出現。② Time 欄唔好理(行程時間細節由網站獨立管理,唔受 Doc 影響)。③ 唔好亂作資料。\n" +
+    '淨係輸出 JSON,格式:{"summary":"<中文一句講改咗乜,或「冇改動」>","patches":[{"id":"dXXXX","<只放改咗嘅欄位>":<值>} ...]}。冇改動時 patches 係空 array。';
   const user =
-    `=== BASELINE DOC ===\n${baselineDoc}\n\n=== NEW DOC ===\n${newDoc}\n\n=== CURRENT DAYS (JSON) ===\n${JSON.stringify(days)}`;
+    `=== BASELINE DOC ===\n${baselineDoc}\n\n=== NEW DOC ===\n${newDoc}\n\n=== CURRENT DAYS (slim JSON) ===\n${JSON.stringify(slimDays(days))}`;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_KEY}`;
   const r = await fetch(url, {
     method: "POST",
@@ -80,7 +127,7 @@ async function geminiMerge(baselineDoc, newDoc, days) {
     body: JSON.stringify({
       system_instruction: { parts: [{ text: sys }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
-      generationConfig: { temperature: 0, maxOutputTokens: 8192, responseMimeType: "application/json" },
+      generationConfig: { temperature: 0, maxOutputTokens: 4096, responseMimeType: "application/json" },
     }),
   });
   if (!r.ok) throw new Error(`Gemini API ${r.status}: ${(await r.text()).slice(0, 300)}`);
@@ -128,22 +175,31 @@ module.exports = async (req, res) => {
 
     step = "geminiMerge";
     const merged = await geminiMerge(baseline, newDoc, days);
-    const changed = Array.isArray(merged.changedDays) ? merged.changedDays : [];
+    const patches = Array.isArray(merged.patches) ? merged.patches : [];
 
-    if (!changed.length) {
+    if (!patches.length) {
       await fsPatch(baseDocPath, { baseline: enc(newDoc) }, ["baseline"]);
       return res.status(200).json({ status: "nochange", message: merged.summary || "冇實質改動 ✅" });
     }
 
     step = "patchFirestore";
-    changed.forEach((d) => { if (d && d.id && daysMap[d.id]) daysMap[d.id] = d; });
+    const changedIds = [];
+    for (const p of patches) {
+      if (!p || !p.id || !daysMap[p.id]) continue;
+      daysMap[p.id] = applyPatch(daysMap[p.id], p);
+      changedIds.push(p.id);
+    }
+    if (!changedIds.length) {
+      await fsPatch(baseDocPath, { baseline: enc(newDoc) }, ["baseline"]);
+      return res.status(200).json({ status: "nochange", message: merged.summary || "冇對應到日子 ✅" });
+    }
     await fsPatch(`trips/${ROOM}`, { days: enc(daysMap), dayOrder: enc(order) }, ["days", "dayOrder"]);
     await fsPatch(baseDocPath, { baseline: enc(newDoc) }, ["baseline"]);
 
     return res.status(200).json({
       status: "updated",
       message: merged.summary || "已更新",
-      changedDays: changed.map((d) => d.id),
+      changedDays: changedIds,
     });
   } catch (e) {
     return res.status(500).json({ step, error: String(e.message || e) });
