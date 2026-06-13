@@ -4,8 +4,9 @@
 
 ## 一次性設定
 
-### 1. 攞 Anthropic API key
-去 https://console.anthropic.com → API Keys → 開一個。增值少少錢(每次撳 sync 大約幾美仙)。
+### 1. 攞 Gemini API key(免費)
+去 https://aistudio.google.com/apikey → **Create API key**。免費 tier、唔使信用卡,你呢種一日撳幾次嘅用量夠晒。
+(⚠️ 免費 tier 嘅資料 Google 可能攞去改進模型;行程唔敏感,一般冇所謂。)
 
 ### 2. 將個 Google Doc 設成公開可讀
 Doc 右上 **Share → General access → Anyone with the link → Viewer**。(Server 要咁先讀到。)
@@ -16,9 +17,9 @@ Doc 右上 **Share → General access → Anyone with the link → Viewer**。(S
 3. Framework Preset 揀 **Other**,其他唔使改,撳 **Deploy**。
    (Vercel 會自動將 `/api/sync.js` 變成 serverless function,`index.html` 照樣靜態 serve。)
 4. 部署完,**Settings → Environment Variables** 加:
-   - `ANTHROPIC_API_KEY` = 你嘅 key (必須)
+   - `GEMINI_API_KEY` = 你嘅 Gemini key (必須)
    - `SYNC_TOKEN` = 隨便一串字 (建議,防人亂撳) — e.g. `bbq-swiss-2026`
-   - (可選) `SYNC_MODEL` = `claude-sonnet-4-6` (預設) 或 `claude-opus-4-8`(更準但貴啲)
+   - (可選) `SYNC_MODEL` = `gemini-2.5-flash` (預設) 或 `gemini-2.0-flash`(更快)
    加完 env var 要 **Redeploy** 一次先生效。
 5. 你個 function URL = `https://<你個project名>.vercel.app/api/sync`
 

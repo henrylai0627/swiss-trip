@@ -1,6 +1,6 @@
 // Vercel serverless function — 由 Google Doc 智能同步去 Firestore
 // 流程:讀 Doc → 同 baseline 比 → call Claude 只 merge 改咗嘅日子 → 寫 Firestore
-// 需要 Vercel env vars: ANTHROPIC_API_KEY (必須)、SYNC_TOKEN (建議)、FIREBASE_API_KEY (可選,有 default)
+// 需要 Vercel env vars: GEMINI_API_KEY (必須,免費 tier)、SYNC_TOKEN (建議)、FIREBASE_API_KEY (可選,有 default)
 //
 // 前提:個 Google Doc 要設成「任何有連結嘅人可檢視」,server 先讀到。
 
@@ -8,9 +8,9 @@ const PROJECT = "swiss-trip-9069a";
 const ROOM = "bbhenry-swiss26-kq84z";
 const DOC_ID = "1OJOUz8FJSG1v7O1dAdZn6_vPL6yTRbKqA1m4IYPd_kk";
 const FB_KEY = process.env.FIREBASE_API_KEY || "AIzaSyBZrWb2ggq5FNDXmACRZu8AikY05KUxB90";
-const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const SYNC_TOKEN = process.env.SYNC_TOKEN || "";
-const MODEL = process.env.SYNC_MODEL || "claude-sonnet-4-6";
+const MODEL = process.env.SYNC_MODEL || "gemini-2.5-flash";
 
 const FS = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
 
@@ -63,7 +63,7 @@ async function fetchDoc() {
   return (await r.text()).replace(/\r\n/g, "\n").trim();
 }
 
-async function claudeMerge(baselineDoc, newDoc, days) {
+async function geminiMerge(baselineDoc, newDoc, days) {
   const sys =
     "你係旅遊行程同步助手。會收到:BB 改前(baseline)同改後(new)嘅 Google Doc 純文字、同埋現有詳細 days 資料(JSON array)。\n" +
     "任務:搵出 new Doc 相對 baseline 改咗邊日邊樣嘢,將改動套落現有 days。\n" +
@@ -73,26 +73,23 @@ async function claudeMerge(baselineDoc, newDoc, days) {
     '淨係輸出 JSON,格式:{"summary":"<中文一句講改咗乜,或「冇改動」>","changedDays":[<day object>...]}。冇改動時 changedDays 係空 array。';
   const user =
     `=== BASELINE DOC ===\n${baselineDoc}\n\n=== NEW DOC ===\n${newDoc}\n\n=== CURRENT DAYS (JSON) ===\n${JSON.stringify(days)}`;
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_KEY}`;
+  const r = await fetch(url, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": ANTHROPIC_KEY,
-      "anthropic-version": "2023-06-01",
-    },
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 8000,
-      system: sys,
-      messages: [{ role: "user", content: user }],
+      system_instruction: { parts: [{ text: sys }] },
+      contents: [{ role: "user", parts: [{ text: user }] }],
+      generationConfig: { temperature: 0, maxOutputTokens: 8192, responseMimeType: "application/json" },
     }),
   });
-  if (!r.ok) throw new Error(`Claude API ${r.status}: ${(await r.text()).slice(0, 300)}`);
+  if (!r.ok) throw new Error(`Gemini API ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const j = await r.json();
-  let txt = (j.content || []).map((b) => b.text || "").join("").trim();
+  const parts = ((j.candidates || [])[0] || {}).content;
+  let txt = parts && parts.parts ? parts.parts.map((p) => p.text || "").join("").trim() : "";
   txt = txt.replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```$/, "").trim();
   const s = txt.indexOf("{"), e = txt.lastIndexOf("}");
-  if (s < 0 || e < 0) throw new Error("Claude 冇回傳 JSON");
+  if (s < 0 || e < 0) throw new Error("Gemini 冇回傳 JSON");
   return JSON.parse(txt.slice(s, e + 1));
 }
 
@@ -104,7 +101,7 @@ module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   if (SYNC_TOKEN && req.headers["x-sync-token"] !== SYNC_TOKEN)
     return res.status(401).json({ error: "unauthorized" });
-  if (!ANTHROPIC_KEY) return res.status(500).json({ error: "未設 ANTHROPIC_API_KEY" });
+  if (!GEMINI_KEY) return res.status(500).json({ error: "未設 GEMINI_API_KEY" });
 
   try {
     const newDoc = await fetchDoc();
@@ -126,7 +123,7 @@ module.exports = async (req, res) => {
     const order = snap && snap.fields && snap.fields.dayOrder ? dec(snap.fields.dayOrder) : Object.keys(daysMap);
     const days = order.map((id) => daysMap[id]).filter(Boolean);
 
-    const merged = await claudeMerge(baseline, newDoc, days);
+    const merged = await geminiMerge(baseline, newDoc, days);
     const changed = Array.isArray(merged.changedDays) ? merged.changedDays : [];
 
     if (!changed.length) {
