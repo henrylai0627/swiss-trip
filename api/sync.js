@@ -103,26 +103,30 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: "unauthorized" });
   if (!GEMINI_KEY) return res.status(500).json({ error: "未設 GEMINI_API_KEY" });
 
+  let step = "init";
   try {
+    step = "fetchDoc";
     const newDoc = await fetchDoc();
 
-    // baseline
+    step = "getBaseline";
     const baseDocPath = `trips/_docsync_swiss`;
     const baseSnap = await fsGet(baseDocPath);
     const baseline = baseSnap && baseSnap.fields && baseSnap.fields.baseline ? dec(baseSnap.fields.baseline) : null;
 
     if (baseline === null) {
+      step = "storeBaseline";
       await fsPatch(baseDocPath, { baseline: enc(newDoc) }, ["baseline"]);
       return res.status(200).json({ status: "init", message: "已初始化 baseline,下次改 Doc 先有得 merge。" });
     }
     if (newDoc === baseline) return res.status(200).json({ status: "nochange", message: "Doc 冇改動 ✅" });
 
-    // current days (source of truth)
+    step = "getDays";
     const snap = await fsGet(`trips/${ROOM}`, "&mask.fieldPaths=days&mask.fieldPaths=dayOrder");
     const daysMap = snap && snap.fields && snap.fields.days ? dec(snap.fields.days) : {};
     const order = snap && snap.fields && snap.fields.dayOrder ? dec(snap.fields.dayOrder) : Object.keys(daysMap);
     const days = order.map((id) => daysMap[id]).filter(Boolean);
 
+    step = "geminiMerge";
     const merged = await geminiMerge(baseline, newDoc, days);
     const changed = Array.isArray(merged.changedDays) ? merged.changedDays : [];
 
@@ -131,9 +135,8 @@ module.exports = async (req, res) => {
       return res.status(200).json({ status: "nochange", message: merged.summary || "冇實質改動 ✅" });
     }
 
-    // 用 id 替換,其餘日子原封不動
+    step = "patchFirestore";
     changed.forEach((d) => { if (d && d.id && daysMap[d.id]) daysMap[d.id] = d; });
-
     await fsPatch(`trips/${ROOM}`, { days: enc(daysMap), dayOrder: enc(order) }, ["days", "dayOrder"]);
     await fsPatch(baseDocPath, { baseline: enc(newDoc) }, ["baseline"]);
 
@@ -143,6 +146,6 @@ module.exports = async (req, res) => {
       changedDays: changed.map((d) => d.id),
     });
   } catch (e) {
-    return res.status(500).json({ error: String(e.message || e) });
+    return res.status(500).json({ step, error: String(e.message || e) });
   }
 };
