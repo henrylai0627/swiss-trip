@@ -202,6 +202,10 @@ footer{text-align:center; color:var(--sub); font-size:12px; padding:20px}
 const gm = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 const pin = q => q ? ` <a class="mlink" href="${gm(q)}" target="_blank" rel="noopener" title="喺 Google Maps 開">📍</a>` : "";
 
+// ⚙️ 部署 Vercel 後喺度填返個 function URL(同 token,如果 Vercel 有設 SYNC_TOKEN)。
+// 填咗 url 之後,ℹ️ 資料頁先會出現「🔄 由 Google Doc 更新」粒制。
+const DOC_SYNC = { url: "", token: "" };
+
 const BUILTIN_DAYS = [
 {
   id:"d0625", date:"2026-06-25", tz:"Asia/Hong_Kong", wx:{lat:22.32, lon:114.17, name:"香港"}, chip:{w:"四",d:"25/6"}, title:"6月25日 (四) 出發日", route:"香港 → 機場", badge:{t:"✈️ 夜機",c:"flight"}, hotel:{ic:"✈️",nm:"On Plane",loc:"CX383 凌晨起飛"},
@@ -867,6 +871,12 @@ function renderInfo(){
   h += `<div class="card"><h3>☁️ 兩部機同步</h3>
     <div id="sync-status" class="frow" style="border:none; padding-top:0">…</div>
     <div class="frow" style="border:none"><small>呢個旅程嘅房號:<b>${escT(curRoom||"")}</b><br>喺另一部機開同一個旅程:主頁 → 🔗 用房號加入,入呢個房號,兩部機就即時互通(🗓 行程、✅ checklist、💰 使費、📎 票截圖)。</small></div></div>`;
+  if(curRoom === DEFAULT_ROOM && DOC_SYNC.url){
+    h += `<div class="card"><h3>🔄 由 Google Doc 同步</h3>
+      <div class="frow" style="border:none; padding-top:0"><small>BB 改完 Google Doc,撳一下自動 merge 最新行程入嚟(只改改咗嗰忽,保留交通 detail)。</small></div>
+      <button class="addbtn" id="docsync-btn" style="width:100%">🔄 立即由 Doc 更新</button>
+      <div id="docsync-status" style="font-size:13px; color:var(--sub); margin-top:8px; line-height:1.5"></div></div>`;
+  }
   h += `<div class="card"><h3>✈️ 航班 ${eb("flight-add",null,"➕")}</h3>`;
   FLIGHTS.forEach((f,i)=>{ h += `<div class="frow"><b>${f.f}</b> ${f.r} ${eb("flight-edit",i,"✏️")}<br><small>${f.d}</small><input class="inf" data-k="flight-${i}" placeholder="Booking ref / 座位"></div>`; });
   if(!FLIGHTS.length) h += `<div class="frow" style="color:var(--sub)">未有航班資料${editMode?"":" — 撳右上角 ✏️ 加"}</div>`;
@@ -928,8 +938,28 @@ function bindTripUI(){
   bindChecklist();
   bindInf();
   bindExpenses();
+  bindDocSync();
   TASKSDEF.forEach(t=>drawThumb(t.id));
   renderFiles();
+}
+
+function bindDocSync(){
+  const b = document.getElementById("docsync-btn"); if(!b) return;
+  const st = document.getElementById("docsync-status");
+  b.addEventListener("click", async ()=>{
+    b.disabled = true; const old = b.textContent; b.textContent = "⏳ 同步緊…";
+    st.textContent = "讀緊 Google Doc + 比較改動…";
+    try{
+      const headers = {"content-type":"application/json"};
+      if(DOC_SYNC.token) headers["x-sync-token"] = DOC_SYNC.token;
+      const r = await fetch(DOC_SYNC.url, {method:"POST", headers});
+      const j = await r.json();
+      if(!r.ok) throw new Error(j.error || ("HTTP "+r.status));
+      const tag = j.status==="updated" ? "✅ " : (j.status==="nochange" ? "👍 " : "ℹ️ ");
+      st.textContent = tag + (j.message||"完成") + (j.changedDays && j.changedDays.length ? ` (${j.changedDays.join(", ")})` : "");
+    }catch(e){ st.textContent = "❌ "+e.message; }
+    finally{ b.disabled = false; b.textContent = old; }
+  });
 }
 
 function blankDay(){
