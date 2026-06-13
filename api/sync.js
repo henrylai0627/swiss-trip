@@ -151,12 +151,21 @@ async function geminiMerge(baselineDoc, newDoc, days) {
     body: JSON.stringify({
       system_instruction: { parts: [{ text: sys }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
-      generationConfig: { temperature: 0, maxOutputTokens: 4096, responseMimeType: "application/json", responseSchema },
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: 8192,
+        responseMimeType: "application/json",
+        responseSchema,
+        thinkingConfig: { thinkingBudget: 0 }, // 關閉 thinking,免得思考 token 食晒 budget 截斷輸出
+      },
     }),
   });
   if (!r.ok) throw new Error(`Gemini API ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const j = await r.json();
-  const parts = ((j.candidates || [])[0] || {}).content;
+  const cand = (j.candidates || [])[0] || {};
+  if (cand.finishReason && cand.finishReason !== "STOP")
+    throw new Error(`Gemini 輸出未完整 (finishReason=${cand.finishReason}) — 可能改動太多,試吓分批改 Doc`);
+  const parts = cand.content;
   let txt = parts && parts.parts ? parts.parts.map((p) => p.text || "").join("").trim() : "";
   txt = txt.replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```$/, "").trim();
   const s = txt.indexOf("{"), e = txt.lastIndexOf("}");
